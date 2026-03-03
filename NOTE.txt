@@ -1,0 +1,77 @@
+
+emh5.eastmoney.com          H5获取A股市场实时行情、历史数据、资金流向、财务指标等金融数据
+push2.eastmoney.com         实时数据推送 http://push2delay.eastmoney.com
+push2his.eastmoney.com      历史数据 K线数据（日K、周K、月K） 分时数据 复权数据
+datacenter.eastmoney.com    数据中心
+quote.eastmoney.com         实时行情 股票、基金、债券、期货实时行情 指数行情 港股、美股行情
+
+
+上方列出主要股票市场指数，动态显示
+
+1 股票行情，表格上方列出热门概念板块，根据热门概念查询股票
+
+
+
+https://datacenter-web.eastmoney.com/api/data/v1/get?reportName=RPT_BILLBOARD_DAILYDETAILSSELL&columns=ALL&filter=(TRADE_DATE='2026-02-03')(SECURITY_CODE="000547")&pageNumber=1&pageSize=50&sortTypes=-1&sortColumns=SELL&source=WEB&client=WEB&_=1770486329447
+上榜后统计 (STATISTICSCYCLENAME="近一月") (STATISTICSCYCLENAME="近三月") (STATISTICSCYCLENAME="近六月")
+https://datacenter-web.eastmoney.com/api/data/v1/get?reportName=RPT_TRADE_BACK_PROFILE&columns=ALL&filter=(STATISTICSCYCLENAME="近三月")(OPERATEDEPT_CODE+in+("10030463","10030463","10634757","10026937","10520724","10000213448","10026937","10467655","0","10484897"))&pageNumber=1&pageSize=50&sortTypes=-1&source=WEB&client=WEB&_=1770486329448
+近一个月涨幅	近三个月涨幅	近六个月涨幅
+https://datacenter-web.eastmoney.com/securities/api/data/v1/get?reportName=RPT_BILLBOARD_STATISTICS&columns=SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,BILLBOARD_TIMES_1M,BILLBOARD_TIMES_3M,BILLBOARD_TIMES_6M,IPCT1M,IPCT3M,IPCT6M&quoteColumns=f2,f3,f8,f21&quoteType=0&filter=(SECURITY_CODE="000547")&pageNumber=1&pageSize=200&sortTypes=&sortColumns=&source=DataCenter&client=WEB&callback=jQuery1123004116039305586894_1770486329442&code=000547&_=1770486329443
+
+
+
+1 获取概念板块最新行情列表，大概不到500个，在概念板块显示
+2 按概念获取个股列表
+### 概念页面
+https://quote.eastmoney.com/center/gridlist.html#concept_board
+概念排名列表
+push2delay.eastmoney.com/api/qt/clist/get?fs=m:90+t:3+f:!50&pn=1&pz=100&fields=f12,f13,f14,f1,f2,f4,f3,f152,f20,f8,f104,f105&fid=f3&po=1&np=1&fltt=1&invt=2&dect=1&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=|0|0|0|web&_=1770654328438
+所属概念的个股列表
+push2delay.eastmoney.com/api/qt/clist/get?fs=b:bk1172+f:!50&pn=1&pz=100&fields=f12,f13,f14,f1,f2,f4,f3,f152,f5,f6,f7,f15,f18,f16,f17,f10,f8,f9,f23&fid=f3&po=1&np=1&fltt=1&invt=2&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=|0|0|0|web&_=1770654635342
+概念板块资金流向
+https://push2.eastmoney.com/api/qt/stock/get?secid=90.BK1172&fields=f135,f136,f137,f138,f139,f140,f141,f142,f143,f144,f145,f146,f147,f148,f149&invt=2&fltt=1&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=4363375817489466|0|1|0|web&dect=1&_=1770693880163
+行业咨询
+https://np-listapi.eastmoney.com/comm/web/getListInfo?cfh=1&client=web&mTypeAndCode=90.BK1172&type=1&pageSize=5&callback=jQuery35108169508511492598_1770693133522&traceId=8449912282&_=1770693133523
+
+
+
+### 每分钟的交易数据 klt=1 K线类型
+https://push2.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64,f65&klt=1&secid=1.600986
+"trends":["2026-01-07 15:00,88.63,88.63,88.63,88.63,2638,23380594.00,88.102,1936,0.00,437302,3852698702.00"]
+
+根据secids返回多个code的字段，字段根据fields决定
+https://push2.eastmoney.com/api/qt/ulist/get?fltt=1&invt=2&fields=f14,f12,f13,f1,f2,f4,f3,f152&secids=122.XAU,122.XAG,109.LCPT,225.lc2605,0.002405,0.000555,0.002777,1.518600&ut=fa5fd1943c7b386f172d6893dbfba10b&pn=1&np=1&pz=20&dect=1&wbp2u=4363375817489466|0|1|0|web&_=1770693133539
+
+
+
+黄金页面
+https://quote.eastmoney.com/q/122.XAU.html
+嵌入图片img
+<img src="//webquotepic.eastmoney.com/GetPic.aspx?imageType=r&type=&token=44c9d251add88e27b65ed86506f6e5da&nid=122.XAU&timespan=1770914654" width="578" height="276">
+
+黄金/美元XAU kline
+http://webquotepic.eastmoney.com/GetPic.aspx?imageType=r&type=&nid=122.XAU&timespan=1770914372
+
+
+黄金/美元XAU formula=RSI 日线type=D 周线type=W 月线type=M 5分钟type=M5 60分钟type=M60
+http://webquoteklinepic.eastmoney.com/GetPic.aspx?nid=122.XAU&type=&unitWidth=-6&ef=&formula=RSI&AT=1&imageType=KXL&timespan=1770914551
+http://webquoteklinepic.eastmoney.com/GetPic.aspx?nid=122.XAU&type=&unitWidth=-6&ef=&formula=MACD&AT=1&imageType=KXL&timespan=1770914551
+
+kline 日线 图片支持 指数 股票 基金 概念板块 行业板块等，不能返回场外的基金
+黄金/美元XAU nid=122.XAU
+白银/美金XAG nid=122.XAG
+综合铜03LCPT nid=109.LCPT
+上证 nid=1.000001
+深证 nid=0.399001
+创业 nid=0.399006
+纳斯达克 nid=100.NDX
+主要指数 1.000001, 0.399001, 0.399006, 1.000300, 100.HSI, 100.UDI, 100.DJIA, 100.SPX, 100.NDX, 100.MCX, 100.FCHI, 100.GDAXI
+场内ETF 上海金ETF nid=1.518600
+股票代码 nid=0.002405,0.000555,0.002777,1.518600
+概念板块 稀土永磁 90.BK0578
+90.BK1036
+半导体BK1036
+
+
+基金净值估算图
+http://j4.dfcfw.com/charts/pic6/560690.png

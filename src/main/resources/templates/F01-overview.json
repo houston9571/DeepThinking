@@ -1,0 +1,224 @@
+{
+  "description": "基金持股",
+  "responseFormat": "HTML",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "executeJavaScript": false,
+  // http://quotes.money.163.com/fund/005827.html
+  "url": "http://quotes.money.163.com/fund/{fcode}.html",
+  "factors": [
+    {
+      "modelName": "fundBasic",
+      "xPath": "div.fn_fund_basic>table>tbody",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "基金名称",
+          "property": "fullName",
+          "xPath": "tr[0]>td[0]"
+        },
+        {
+          "description": "基金简称",
+          "property": "fname",
+          "xPath": "tr[0]>td[1]"
+        },
+        {
+          "description": "基金代码",
+          "property": "fcode",
+          "xPath": "tr[0]>td[2]"
+        },
+        {
+          "description": "基金类型",
+          "property": "type",
+          "xPath": "tr[1]>td[0]"
+        },
+        {
+          "description": "投资类型",
+          "property": "tzlx",
+          "xPath": "tr[1]>td[1]"
+        },
+        {
+          "description": "投资风格",
+          "property": "tzfg",
+          "xPath": "tr[1]>td[2]"
+        },
+        {
+          "description": "成立日期",
+          "property": "clsj",
+          "xPath": "tr[2]>td[0]"
+        },
+        {
+          "description": "基金公司",
+          "property": "jjgs",
+          "xPath": "tr[2]>td[1]"
+        },
+        {
+          "description": "基金经理",
+          "property": "jjjl",
+          "xPath": "tr[2]>td[2]"
+        },
+        {
+          "description": "总份额",
+          "property": "zfe",
+          "xPath": "tr[3]>td[0]"
+        },
+        {
+          "description": "总净资产",
+          "property": "zjzc",
+          "xPath": "tr[3]>td[1]"
+        },
+        {
+          "description": "基金分红",
+          "property": "jjfh",
+          "xPath": "tr[3]>td[2]"
+        },
+        {
+          "description": "风险收益特征",
+          "property": "fxsytz",
+          "xPath": "tr[4]>td[0]"
+        }
+      ]
+    },
+    {
+      "modelName": "fundManager",
+      "xPath": "div.fn_fund_manager>div.fn_fund_mod_content>table>tbody",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "学历",
+          "property": "xl",
+          "xPath": "tr[0]>td[0]"
+        },
+        {
+          "description": "任职日期",
+          "property": "rzrq",
+          "xPath": "tr[0]>td[2]"
+        },
+        {
+          "description": "任职天数",
+          "property": "rzts",
+          "xPath": "tr[0]>td[4]"
+        },
+        {
+          "description": "任职收益",
+          "property": "rzsy",
+          "xPath": "tr[1]>td[1]"
+        },
+        {
+          "description": "同期上证",
+          "property": "tqsz",
+          "xPath": "tr[1]>td[3]"
+        }
+      ]
+    },
+    {
+      "modelName": "fundPartReport",
+      "xPath": "table.fn_cm_table.fn_fund_part_report>tbody",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "报告期",
+          "property": "reportDate",
+          "xPath": "tr[0]>td[0]"
+        },
+        {
+          "description": "期末份额",
+          "property": "qmfe",
+          "xPath": "tr[0]>td[1]"
+        },
+        {
+          "description": "季度申购量",
+          "property": "jdsgl",
+          "xPath": "tr[0]>td[2]"
+        },
+        {
+          "description": "季度赎回量",
+          "property": "jdshl",
+          "xPath": "tr[0]>td[3]"
+        },
+        {
+          "description": "季度净申购额",
+          "property": "jdjsge",
+          "xPath": "tr[0]>td[4]"
+        },
+        {
+          "description": "份额变化率",
+          "property": "febhl",
+          "xPath": "tr[0]>td[5]"
+        }
+      ]
+    },
+    {
+      "modelName": "fundInvestSetup",
+      "xPath": "div.fn_fund_invest_setup",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "股票资金",
+          "property": "gpzj",
+          "xPath": "table>tbody>tr[0]>td[1]",
+          "xPattern": [
+            "(.*?)元"
+          ]
+        },
+        {
+          "description": "股票占总值比例",
+          "property": "gpzzzbl",
+          "xPath": "table>tbody>tr[0]>td[2]"
+        },
+        {
+          "description": "股票变动",
+          "property": "gpbd",
+          "xPath": "table>tbody>tr[0]>td[3]"
+        },
+        {
+          "description": "报告期",
+          "property": "reportDate",
+          "xPath": "div.fn_fund_invest_tips>span[0]",
+          "xPattern": [
+            "(\\d{4}-\\d{1,2}-\\d{1,2})"
+          ]
+        }
+      ]
+    },
+    {
+      "modelName": "fundInvestItem",
+      "xPath": "div.fn_fund_invest_item[0]>table>tbody>tr",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "MANY",
+      "subsets": [
+        {
+          "description": "股票代码",
+          "property": "code",
+          "xPath": "td[0]>a",
+          "xAttribute": "href",
+          "xPattern": [
+            "com/(.*?)\\.html"
+          ]
+        },
+        {
+          "description": "持有量(股)",
+          "property": "cyl",
+          "xPath": "td[1]"
+        },
+        {
+          "description": "市值",
+          "property": "sz",
+          "xPath": "td[2]"
+        },
+        {
+          "description": "占净值比",
+          "property": "zjbz",
+          "xPath": "td[3]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        }
+      ]
+    }
+  ]
+}

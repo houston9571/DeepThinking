@@ -1,0 +1,145 @@
+{
+  "description": "公司概况-HK",
+  "responseFormat": "JSON",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "executeJavaScript": false,
+  // http://emweb.securities.eastmoney.com/PC_HKF10/CompanyProfile/PageAjax?code=03690
+  "url": "http://emweb.securities.eastmoney.com/PC_HKF10/CompanyProfile/PageAjax?code={code}",
+  "factors": [
+    {
+      "modelName": "overview",
+      "xPath": "",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "股票代码",
+          "property": "code",
+          "xPath": "$.zqzl.zqdm",
+          "xPattern": [
+            "(\\d+).HK"
+          ]
+        },
+        {
+          "description": "股票名称",
+          "property": "sname",
+          "xPath": "$.zqzl.zqjc"
+        },
+        {
+          "description": "交易所代码",
+          "property": "marketCode",
+          "xPath": ""
+        },
+        {
+          "description": "上市交易所",
+          "property": "market",
+          "xPath": "$.zqzl.zqdm",
+          "xPattern": [
+            "\\.(\\w{2})"
+          ]
+        },
+        {
+          "description": "公司名称",
+          "property": "gsmc",
+          "xPath": "$.gszl.gsmc"
+        },
+        {
+          "description": "英文名称",
+          "property": "ywmc",
+          "xPath": "$.gszl.ywmc"
+        },
+        {
+          "description": "曾用名",
+          "property": "cym",
+          "xPath": ""
+        },
+        {
+          "description": "公司全称",
+          "property": "agjc",
+          "xPath": "$.gszl.gsmc"
+        },
+        {
+          "description": "证券类别",
+          "property": "zqlb",
+          "xPath": "$.zqzl.zqlx"
+        },
+        {
+          "description": "所属东财行业",
+          "property": "sshy",
+          "xPath": "$.gszl.sshy"
+        },
+        {
+          "description": "所属证监会行业",
+          "property": "sszjhhy",
+          "xPath": "$.gszl.sshy"
+        },
+        {
+          "description": "法人代表",
+          "property": "frdb",
+          "xPath": ""
+        },
+        {
+          "description": "董事长",
+          "property": "dsz",
+          "xPath": "$.gszl.dsz"
+        },
+        {
+          "description": "公司网址",
+          "property": "gswz",
+          "xPath": "$.gszl.gswz"
+        },
+        {
+          "description": "办公地址",
+          "property": "bgdz",
+          "xPath": "$.gszl.bgdz"
+        },
+        {
+          "description": "注册地址",
+          "property": "zcdz",
+          "xPath": "$.gszl.zcd"
+        },
+        {
+          "description": "注册资本",
+          "property": "zczb",
+          "xPath": ""
+        },
+        {
+          "description": "公司简介",
+          "property": "gsjj",
+          "xPath": "$.gszl.gsjs"
+        },
+        {
+          "description": "经营范围",
+          "property": "jyfw",
+          "xPath": ""
+        },
+        {
+          "description": "成立日期",
+          "property": "clrq",
+          "xPath": "$.gszl.gsclrq"
+        },
+        {
+          "description": "上市日期",
+          "property": "ssrq",
+          "xPath": "$.zqzl.ssrq"
+        },
+        {
+          "description": "发行数量",
+          "property": "fxl",
+          "xPath": ""
+        },
+        {
+          "description": "发行价格",
+          "property": "mgfxj",
+          "xPath": ""
+        },
+        {
+          "description": "募资资金净额",
+          "property": "mjzjje",
+          "xPath": ""
+        }
+      ]
+    }
+  ]
+}

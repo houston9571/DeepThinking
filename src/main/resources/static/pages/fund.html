@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="../css/theme-default-easytable.css" />
+		<script src="../js/config.js"></script>
+		<script src="../js/Sortable.js"></script>
+		<script src="https://unpkg.com/vue/dist/vue.js"></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	</head>
+	<body>
+		<div id="app" style="font-size: 12px;">
+			<div class="ve-table">
+				<div class="ve-table-container ve-table-border-around" style="max-height: 864px;">
+					<table class="ve-table-content ve-table-border-x ve-table-border-y" style="width: 2000px;">
+						<thead class="ve-table-fixed-header ve-table-header">
+							<tr class="ve-table-header-tr">
+								<th class="ve-table-fixed-left" style="width: 15px; left: 0px;background-color: #fafafa;" rowspan="2"></th>
+								<th class="ve-table-header-th ve-table-fixed-left" style="width: 180px; left: 15px;" rowspan="2">基金</th>
+								<th class="ve-table-header-th" style="width: 130px;" rowspan="2">基金经理 | 任职收益<br>任职日期 | 任职天数</th>
+								<th class="ve-table-header-th" style="width: 90px;" rowspan="2">投资风格<br>成立日期</th>
+								<th class="ve-table-header-th" style="width: 90px;" rowspan="2"> 总净资产</th>
+								<th class="ve-table-header-th" style="width: 240px;" colspan="3">股票资金</th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="gzzf" @click="doSort"> 估值涨幅 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="days" @click="doSort">连涨天数</a></th>
+								<th class="ve-table-header-th" style="width: 60px;" rowspan="2" v-for="d in dates"><a :id="d+'.zdf'" @click="doSort">{{d}}</a></th>
+								<th class="ve-table-header-th" style="width: 90px;" rowspan="2"><a id="dwjz" @click="doSort"> 单位净值 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="jyz" @click="doSort"> 近1周 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="jyy" @click="doSort"> 近1月 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="jsy" @click="doSort"> 近3月 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="jly" @click="doSort"> 近6月 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="jnyl" @click="doSort"> 今年以来 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="jyn" @click="doSort"> 近1年 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="jln" @click="doSort"> 近2年 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="jsn" @click="doSort"> 近3年 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="clyl" @click="doSort"> 成立以来 </a></th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2">同类平均</th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2">沪深300</th>
+								<th class="ve-table-header-th" style="width: 70px;" rowspan="2"><a id="avr" @click="doSort"> 评价均分 </a></th>
+								<th class="ve-table-header-th" style="width: 160px;" colspan="2">季度申购</th>
+							</tr>
+							<tr class="ve-table-header-tr">
+								<th class="ve-table-header-th">额度</th>
+								<th class="ve-table-header-th">占比</th>
+								<th class="ve-table-header-th">变动</th>
+								<th class="ve-table-header-th">变化率</th>
+								<th class="ve-table-header-th">净申购额</th> 
+							</tr>
+						</thead>
+						<tbody id="sort" class="ve-table-body ve-table-stripe ve-table-row-hover ve-table-row-highlight">
+							<tr style="height: 0px;"></tr>
+							<tr class="ve-table-body-tr" v-for="(col, index) in tableData" :id="col.fcode">
+								<td class="ve-table-fixed-left" style="text-align: right;left: 0px;">
+									<a href="#" class="em-totop" @click="moveTop(col.fcode)"><b class="em-icon em-ftop em-pro-toTop"></b></a>
+								</td>
+								<td class="ve-table-body-td ve-table-fixed-left" style="text-align: left;left: 15px; color: #4372ba;">
+									<a :href="'http://fund.eastmoney.com/'+col.fcode+'.html'" target="_blank">{{col.fullName}}</a>
+									<div v-on:click="showInvestStock(col.fullName,col.tradeOn, col.fname, col.fcode)" style="line-height: 8px;">
+										<br>
+										<font style="color: #888">{{col.fcode}} {{col.tradeOn}}{{col.tradeOn=='场内'? '-'+col.fname:''}}</font>
+									</div>
+								</td>
+								<td class="ve-table-body-td" style="text-align: left;padding-left: 5px; color: #4372ba;" :title="col.managerInfo">
+									<a :href="'http://fund.eastmoney.com/manager/'+col.mid+'.html'" target="_blank">{{col.jjjl}}</a>
+									<span :style="col.rzsy>0 ? 'color: red' : 'color: green'">{{col.rzsy}}%</span>
+									<font style="color: #888"><br>{{col.rzrq}} {{col.rzts}}</font>
+								</td>
+								<td class="ve-table-body-td" style="text-align: left;padding-left: 5px;" :title="col.jjtd">
+									<a :href="'http://fundf10.eastmoney.com/jbgk_'+col.fcode+'.html'" target="_blank">
+										{{col.tzfg}}
+										<font style="color: #888"><br>{{col.clsj}}</font>
+									</a>
+								</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;">{{col.zjzc}}</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;">{{col.gpzj}}</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;">{{col.gpzzzbl}}</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;">{{col.gpbd}}</td>
+								<td class="ve-table-body-td" style="text-align: center;">
+									<div @click="showPic(col.fcode)" style="cursor: pointer;">
+										<span :style="col.gzzf>0 ? 'color: red' : 'color: green'">{{col.gzzf?col.gzzf+'%':''}}</span>
+									</div>
+								</td>
+								<td class="ve-table-body-td" style="text-align: center;"><span :style="col.days>0 ? 'color: red' : 'color: green'">{{col.days}}</span></td>
+								<td class="ve-table-body-td" style="text-align: center;" v-for="d in dates">
+									<a :href="'http://fundf10.eastmoney.com/jjjz_'+col.fcode+'.html'" target="_blank">
+										<span v-if="col[d]!=null" :style="col[d]['zdf']>0 ? 'color: red' : 'color: green'">{{col[d]['zdf']+'% '}}</span>
+									</a>
+								</td>
+								<td class="ve-table-body-td" style="text-align: right;">{{col.dwjz}}<br>
+									<font style="color: #888">{{col.date}}</font>
+								</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.jyz>0 ? 'color: red' : 'color: green'">{{col.jyz?col.jyz+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.jyy>0 ? 'color: red' : 'color: green'">{{col.jyy?col.jyy+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.jsy>0 ? 'color: red' : 'color: green'">{{col.jsy?col.jsy+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.jly>0 ? 'color: red' : 'color: green'">{{col.jly?col.jly+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.jnyl>0 ? 'color: red' : 'color: green'">{{col.jnyl?col.jnyl+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.jyn>0 ? 'color: red' : 'color: green'">{{col.jyn?col.jyn+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.jln>0 ? 'color: red' : 'color: green'">{{col.jln?col.jln+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.jsn>0 ? 'color: red' : 'color: green'">{{col.jsn?col.jsn+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.clyl>0 ? 'color: red' : 'color: green'">{{col.clyl?col.clyl+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.tlpj>0 ? 'color: red' : 'color: green'">{{col.tlpj?col.tlpj+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.hs300>0 ? 'color: red' : 'color: green'">{{col.hs300?col.hs300+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 30px;color: #4372ba;" :title="col.avrInfo">{{col.avr}}</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 10px;"><span :style="col.febhl>0 ? 'color: red' : 'color: green'">{{col.febhl?col.febhl+'%':''}}</span></td>
+								<td class="ve-table-body-td" style="text-align: right;"><span :style="col.febhl>0 ? 'color: red' : 'color: green'">{{col.jdjsge}}</span></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!--弹出层时背景层DIV-->
+		<div id="fade" class="black_overlay" onclick="CloseDiv()"></div>
+		<div id="MyDiv" class="white_content" style="overflow-x:hidden; overflow-y:hidden;"></div>
+		<div id="picDiv" class="white_content" style="top: 30%; left: 40%;width: 450px;height: 280px;overflow-x:hidden; overflow-y:hidden;"></div>
+	</body>
+
+	<script> 
+		window.setInterval(function() { 
+			var now = new Date();
+			var h = now.getHours(); 
+			if(9 < h && h < 15)
+				vm.getLastGzzf();	
+		}, 1000*10);
+		var fade = document.getElementById('fade');
+		var MyDiv = document.getElementById('MyDiv');
+		var picDiv = document.getElementById('picDiv');
+		var zxgz = document.getElementById('zxgz');
+		//关闭弹出层
+		fade.onclick = function() {
+			MyDiv.style.display = 'none';
+			picDiv.style.display = 'none';
+			fade.style.display = 'none';
+		};
+		// 异步请求函数必须要写在外面，然后在vue里面调用
+		function asyncLoadDate() {
+			axios.get(url + 'fund')
+				.then(function(response) {
+					if (response.status == 200) {
+						vm.fillData(response);
+					}
+				})
+				.catch(function(error) {
+					console.error("asyncLoadDate系统异常:"+error);
+				});
+		}
+
+		function refleshFundValueHistory() {
+			axios.get(url + 'refleshFundValueHistory')
+				.then(function(response) {
+					if (response.status == 200) {
+						asyncLoadDate();
+					}
+				})
+				.catch(function(error) {
+					console.error("refleshFundValueHistory系统异常:"+error);
+				});
+		}
+		jsonpgz = (result) => {
+			vm.fillGzzf(result);
+		}
+		// JSONP
+		function jsonpScript(url) {
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.src = url;
+			document.body.appendChild(script);
+		}
+		var vm = new Vue({
+			el: "#app",
+			mounted: function() {
+				asyncLoadDate();
+				saveSortData('sort', url + 'setFundSort');
+			},
+			methods: {
+				showPic(fcode){
+					picDiv.style.display = 'block';
+					fade.style.display = 'block';
+					picDiv.innerHTML = '<img src="http://j4.dfcfw.com/charts/pic6/' + fcode + '.png"/>';
+				},
+				//弹出隐藏层
+				showInvestStock: function(fullName, tradeOn, fname, fcode) {
+					MyDiv.style.display = 'block';
+					fade.style.display = 'block';
+					MyDiv.innerHTML = '<div style="padding: 18px; font-size: large;">' + fcode + ' ' + fullName + ' (' + tradeOn +
+						(tradeOn == '场内' ? '-' + fname : '') + ')</div>' +
+						'<object type="text/html" data="stock.html?' + fcode + '" width="100%" height="92%"></object>';
+
+				},
+				fillData: function(response) {
+					let json = response.data;
+					this.dates = json.columns;
+					let data = json.data;
+					data.forEach((a) => {
+						jsonpScript('http://fundgz.1234567.com.cn/js/' + a.fcode + '.js');
+					});
+					this.tableData = data; 
+				},
+				fillGzzf: function(result) {
+					let data = this.tableData.slice(0);
+					data.forEach((a) => {
+						if (a.fcode == result.fundcode) {
+							a.gzzf = result.gszzl;
+						}
+					});
+					this.tableData = data;
+				},
+				getLastGzzf() {
+					let data = this.tableData.slice(0);
+					data.forEach((a) => {
+						jsonpScript('http://fundgz.1234567.com.cn/js/' + a.fcode + '.js');
+					});
+					this.tableData = data;
+					console.debug('getLastGzzf')
+				},
+				moveTop: function(id){ 
+					moveTop(id, 'sort', url + 'setFundSort');
+				},	
+				doSort: function(event) {
+					if(this.isDragging){
+						destroySort();
+						this.isDragging = false;
+					}
+					// console.log(event.target.className)
+					// console.log(event.target.id)
+					var className = event.target.className;
+					className = className == '' || className == 'asc' ? 'desc' : 'asc';
+					document.querySelectorAll('.desc').forEach(a => {
+						a.className = ''
+					})
+					document.querySelectorAll('.asc').forEach(a => {
+						a.className = ''
+					})
+					event.target.className = className;
+					let data = this.tableData.slice(0);
+					var id = event.target.id;
+					var hasSub = id.indexOf(".") > 0;
+					if (hasSub) {
+						var i = id.indexOf(".");
+						id_o = id.substr(0, i);
+						id_t = id.substr(i + 1);
+					}
+					if (className === "asc") {
+						data.sort((a, b) => {
+							if (hasSub) {
+								if (a[id_o] == null || a[id_o][id_t] == null || a[id_o][id_t] == '')
+									return 1;
+								if (b[id_o] == null || b[id_o][id_t] == null || b[id_o][id_t] == '')
+									return -1;
+								return a[id_o][id_t] - b[id_o][id_t];
+							} else {
+								if (a[id] == null || a[id]=='') 
+									return 1; 
+								if (b[id] == null || b[id]=='')
+									return -1;
+								return a[id] - b[id];
+							}
+						});
+					} else if (className === "desc") {
+						data.sort((a, b) => {
+							if (hasSub) {
+								if (a[id_o] == null || a[id_o][id_t] == null || a[id_o][id_t] == '')
+									return 1;
+								if (b[id_o] == null || b[id_o][id_t] == null || b[id_o][id_t] == '')
+									return -1;
+								return b[id_o][id_t] - a[id_o][id_t];
+							} else {
+								if (a[id] == null || a[id]=='') 
+									return 1; 
+								if (b[id] == null || b[id]=='')
+									return -1;
+								return b[id] - a[id];
+							}
+						});
+					}
+				
+					this.tableData = data;
+				}
+			},
+			data: function() {
+				return {
+					isDragging : true,
+					tableData: [],
+					dates: []
+				};
+			},
+		});
+	</script>
+
+</html>

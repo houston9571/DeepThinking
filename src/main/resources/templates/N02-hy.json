@@ -1,0 +1,125 @@
+{
+  "description": "北向资金-行业",
+  "responseFormat": "JSON",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "executeJavaScript": false,
+  // url特殊字符需要转义
+  // http://dcfm.eastmoney.com/EM_MutiSvcExpandInterface/api/js/get?type=HSGT20_HYTJ_SUM&token=894050c76af8597a853f5b408b759f5d&st=ShareSZ_ZC&sr=-1&p=1&ps=50&filter=%28DateType=%271%27%29&rt=53762868
+  "url": "http://dcfm.eastmoney.com/EM_MutiSvcExpandInterface/api/js/get?type=HSGT20_HYTJ_SUM&token=894050c76af8597a853f5b408b759f5d&st=ShareSZ_ZC&sr=-1&p={pageNo}&ps={pageSize}&filter=%28DateType=%271%27%29&rt=53762868",
+  "factors": [
+    {
+      "modelName": "northHyData",
+      "xPath": "",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "MANY",
+      "subsets": [
+        {
+          "description": "日期",
+          "property": "hdDate",
+          "xPath": "$.HdDate"
+        },
+        {
+          "description": "行业",
+          "property": "hy",
+          "xPath": "$.HYName"
+        },
+        {
+          "description": "行业代码",
+          "property": "hycode",
+          "xPath": "$.ORIGINALCODE"
+        },
+        {
+          "description": "涨跌幅",
+          "property": "zdf",
+          "xPath": "$.Zdf"
+        },
+        {
+          "description": "持股只数",
+          "property": "cgzs",
+          "xPath": "$.Count"
+        },
+        {
+          "description": "市值",
+          "property": "sz",
+          "xPath": "$.ShareSZ_GZ"
+        },
+        {
+          "description": "占板块比%",
+          "property": "zbkb",
+          "xPath": "$.ShareHold_Chg_BK"
+        },
+        {
+          "description": "占北向资金比%",
+          "property": "zbxzjb",
+          "xPath": "$.ShareHold_Chg_GZ"
+        },
+        {
+          "description": "增持持股只数",
+          "property": "zccgzs",
+          "xPath": "$.ZC_Count"
+        },
+        {
+          "description": "增持市值",
+          "property": "zcsz",
+          "xPath": "$.ShareSZ_ZC"
+        },
+        {
+          "description": "增持增幅",
+          "property": "zczf",
+          "xPath": "$.ShareHold_ZC_Chg"
+        },
+        {
+          "description": "增持占板块比%",
+          "property": "zczbkb",
+          "xPath": "$.ShareHold_ZC_Chg_BK"
+        },
+        {
+          "description": "增持占北向资金比%",
+          "property": "zczbxzjb",
+          "xPath": "$.ShareHold_ZC_Chg_GZ"
+        },
+        {
+          "description": "增持最大股市值代码",
+          "property": "zczdgszdm",
+          "xPath": "$.Max_SZ_Code"
+        },
+        {
+          "description": "增持最大股市值",
+          "property": "zczdgsz",
+          "xPath": "$.Max_SZ_Name"
+        },
+        {
+          "description": "增持最大股占股本比代码",
+          "property": "zczdgzgbbdm",
+          "xPath": "$.Max_ZB_Code"
+        },
+        {
+          "description": "增持最大股占股本比",
+          "property": "zczdgzgbb",
+          "xPath": "$.Max_ZB_Name"
+        },
+        {
+          "description": "减持最大股市值代码",
+          "property": "jczdgszdm",
+          "xPath": "$.Min_ZB_Code"
+        },
+        {
+          "description": "减持最大股市值",
+          "property": "jczdgsz",
+          "xPath": "$.Min_ZB_Name"
+        },
+        {
+          "description": "减持最大占股本比代码",
+          "property": "jczdgzgbbdm",
+          "xPath": "$.Min_SZ_Code"
+        },
+        {
+          "description": "减持最大占股本比",
+          "property": "jczdgzgbb",
+          "xPath": "$.Min_SZ_Name"
+        }
+      ]
+    }
+  ]
+}

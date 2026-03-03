@@ -1,0 +1,308 @@
+{
+  "description": "资金流向",
+  "responseFormat": "JSON",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "encoding": "GBK",
+  "executeJavaScript": false,
+  // http://push2.eastmoney.com/api/qt/stock/get?secid=1.601633&ut=fa5fd1943c7b386f172d6893dbfba10b&invt=2&fltt=2
+  // &fields=f43,f44,f45,f46,f47,f48,f50,f51,f52,f55,f57,f58,f60,f62,f71,f84,f85,f86,f92,f105,f116,f117,f127,f128,f135,f136,
+  // f137,f138,f139,f140,f141,f142,f143,f144,f145,f146,f147,f148,f149,f161,f162,f163,f164,f167,f168,f169,f170,f173,f183,
+  // f184,f185,f186,f187,f188,f189,f190,f191,f192,f193,f194,f195,f196,f197,f258,f263
+  "url": "http://push2.eastmoney.com/api/qt/stock/get?secid={marketCode}.{code}&ut=fa5fd1943c7b386f172d6893dbfba10b&invt=2&fltt=2&fields=f43,f44,f45,f46,f47,f48,f50,f51,f52,f55,f57,f58,f60,f62,f71,f84,f85,f86,f92,f105,f116,f117,f127,f128,f135,f136,f137,f138,f139,f140,f141,f142,f143,f144,f145,f146,f147,f148,f149,f161,f162,f163,f164,f167,f168,f169,f170,f173,f183,f184,f185,f186,f187,f188,f189,f190,f191,f192,f193,f194,f195,f196,f197,f258,f263",
+  "factors": [
+    {
+      "modelName": "moneyFlowMain",
+      "xPath": "$.data",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "时间",
+          "property": "sj",
+          "xPath": "$.f86"
+        },
+        {
+          "description": "最新价",
+          "property": "zxj",
+          "xPath": "$.f43"
+        },
+        {
+          "description": "最高价",
+          "property": "zgj",
+          "xPath": "$.f44"
+        },
+        {
+          "description": "最低价",
+          "property": "zdj",
+          "xPath": "$.f45"
+        },
+        {
+          "description": "均价",
+          "property": "jj",
+          "xPath": "$.f71"
+        },
+        {
+          "description": "今开",
+          "property": "jkj",
+          "xPath": "$.f46"
+        },
+        {
+          "description": "昨收",
+          "property": "zs",
+          "xPath": "$.f60"
+        },
+        {
+          "description": "涨停",
+          "property": "zt",
+          "xPath": "$.f51"
+        },
+        {
+          "description": "跌停",
+          "property": "dt",
+          "xPath": "$.f52"
+        },
+        {
+          "description": "换手",
+          "property": "hs",
+          "xPath": "$.f168"
+        },
+        {
+          "description": "涨跌额",
+          "property": "zde",
+          "xPath": "$.f169"
+        },
+        {
+          "description": "涨跌幅",
+          "property": "zdf",
+          "xPath": "$.f170"
+        },
+        {
+          "description": "委比",
+          "property": "wb",
+          "xPath": "$.f191"
+        },
+        {
+          "description": "委差",
+          "property": "wc",
+          "xPath": "$.f192"
+        },
+        {
+          "description": "主力流入",
+          "property": "zllr",
+          "xPath": "$.f135"
+        },
+        {
+          "description": "主力流出",
+          "property": "zllc",
+          "xPath": "$.f136"
+        },
+        {
+          "description": "主力净流入",
+          "property": "zljll",
+          "xPath": "$.f137"
+        },
+        {
+          "description": "主力净比%",
+          "property": "zljb",
+          "xPath": "$.f193"
+        },
+        {
+          "description": "超大单流入",
+          "property": "cddlr",
+          "xPath": "$.f138"
+        },
+        {
+          "description": "超大单流出",
+          "property": "cddlc",
+          "xPath": "$.f139"
+        },
+        {
+          "description": "超大单净流入",
+          "property": "cddjlr",
+          "xPath": "$.f140"
+        },
+        {
+          "description": "超大单净比%",
+          "property": "cddjb",
+          "xPath": "$.f194"
+        },
+        {
+          "description": "大单流入",
+          "property": "ddlr",
+          "xPath": "$.f141"
+        },
+        {
+          "description": "大单流出",
+          "property": "ddlc",
+          "xPath": "$.f142"
+        },
+        {
+          "description": "大单净流入",
+          "property": "ddjlr",
+          "xPath": "$.f143"
+        },
+        {
+          "description": "大单净比%",
+          "property": "ddjb",
+          "xPath": "$.f195"
+        },
+        {
+          "description": "中单流入",
+          "property": "zdlr",
+          "xPath": "$.f144"
+        },
+        {
+          "description": "中单流出",
+          "property": "zdlc",
+          "xPath": "$.f145"
+        },
+        {
+          "description": "中单净流入",
+          "property": "zdjlr",
+          "xPath": "$.f146"
+        },
+        {
+          "description": "中单净比%",
+          "property": "zdjb",
+          "xPath": "$.f196"
+        },
+        {
+          "description": "小单流入",
+          "property": "xdlr",
+          "xPath": "$.f147"
+        },
+        {
+          "description": "小单流出",
+          "property": "xdlc",
+          "xPath": "$.f148"
+        },
+        {
+          "description": "小单净流入",
+          "property": "xdjlc",
+          "xPath": "$.f149"
+        },
+        {
+          "description": "小单净比%",
+          "property": "xdjb",
+          "xPath": "$.f197"
+        },
+        {
+          "description": "成交量",
+          "property": "cjl",
+          "xPath": "$.f47"
+        },
+        {
+          "description": "成交额",
+          "property": "cje",
+          "xPath": "$.f48"
+        },
+        {
+          "description": "量比%",
+          "property": "lb",
+          "xPath": "$.f50"
+        },
+        {
+          "description": "季度收益%",
+          "property": "jdsy",
+          "xPath": "$.f55"
+        },
+        {
+          "description": "季度",
+          "property": "jd",
+          "xPath": "$.f62"
+        },
+        {
+          "description": "总市值",
+          "property": "zsz",
+          "xPath": "$.f116"
+        },
+        {
+          "description": "流通市值",
+          "property": "ltsz",
+          "xPath": "$.f117"
+        },
+        {
+          "description": "净利润",
+          "property": "jlr",
+          "xPath": "$.f105"
+        },
+        {
+          "description": "市盈率(动)",
+          "property": "syld",
+          "xPath": "$.f162"
+        },
+        {
+          "description": "市盈率(静)",
+          "property": "sylj",
+          "xPath": "$.f163"
+        },
+        {
+          "description": "市盈滚动",
+          "property": "sygd",
+          "xPath": "$.f164"
+        },
+        {
+          "description": "市净率",
+          "property": "sjl",
+          "xPath": "$.f167"
+        },
+        {
+          "description": "净资产收益率%（ROE）",
+          "property": "jzcsyl",
+          "xPath": "$.f173"
+        },
+        {
+          "description": "总营收",
+          "property": "zys",
+          "xPath": "$.f183"
+        },
+        {
+          "description": "总营收同比",
+          "property": "zystb",
+          "xPath": "$.f184"
+        },
+        {
+          "description": "毛利率%",
+          "property": "mll",
+          "xPath": "$.f186"
+        },
+        {
+          "description": "净利润同比",
+          "property": "jlrtb",
+          "xPath": "$.f185"
+        },
+        {
+          "description": "净利率%",
+          "property": "jll",
+          "xPath": "$.f187"
+        },
+        {
+          "description": "负债率",
+          "property": "fzl",
+          "xPath": "$.f188"
+        },
+        {
+          "description": "每股未分配利润",
+          "property": "mgwfplr",
+          "xPath": "$.f190"
+        },
+        {
+          "description": "总股本",
+          "property": "zgb",
+          "xPath": "$.f84"
+        },
+        {
+          "description": "流通股",
+          "property": "ltg",
+          "xPath": "$.f85"
+        },
+        {
+          "description": "每股净资产",
+          "property": "mgjzc",
+          "xPath": "$.f92"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="../css/theme-default-easytable.css"/>
+    <link rel="stylesheet" href="../css/my.css"/>
+    <script src="../js/config.js"></script>
+    <script src="../js/Sortable.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/axios.min.js"></script>
+</head>
+<body>
+<div id="app" style="font-size: 12px;">
+    <div class="ve-table">
+        <div class="ve-table-container ve-table-border-around" id="vDiv" style="max-height: 900px; ">
+            <table class="ve-table-content ve-table-border-x ve-table-border-y" id="vTable">
+                <thead class="ve-table-fixed-header ve-table-header">
+                <tr class="ve-table-header-tr">
+                    <th class="ve-table-header-th" style="width: 140px;" v-for="col in tableData[0]">
+                        <div class="td-flex">
+                            <span class="center" style="width: 100%;">{{col.tradeDate}}</span>
+                        </div>
+                        <div class="td-flex">
+                            <span class="center" style="width: 100%;">{{col.week}}</span>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="sort" class="ve-table-body ve-table-stripe ve-table-row-hover ve-table-row-highlight">
+                <tr style="height: 0px;"></tr>
+                <tr class="ve-table-body-tr" v-for="(col,index) in tableData" v-if="index > 0">
+                    <td class="ve-table-body-td" v-for="c in col" :class="c.conceptCode"
+                        @mouseenter="isHover(c.conceptCode)" @mouseleave="isLeave(c.conceptCode)">
+                        <div class="td-flex center">
+                            <a :href="'https://quote.eastmoney.com/bk/'+c.market+'.'+c.conceptCode+'.html'" target="_blank" style="color: #494949">
+                                <span class="center" style="width: 100%;" :style="c.conceptName.length > 6 ? 'font-size: 17px;' : 'font-size: 20px;'">{{c.conceptName}}</span>
+                            </a>
+                        </div>
+                        <div class="td-flex">
+                            <span class="right" style="width: 50%; font-size: 15px;" :style="c.changePercent.startsWith('-') ? 'color: green' : 'color: red'">{{c.changePercent}}</span>
+                            <!--<div class="center" ><span style="color: red">{{c.upNum}}</span> | <span style="color: green;">{{c.downNum}}</span></div>-->
+                            <span class="center" style="width: 50%" :style="c.mainNetIn.startsWith('-') ? 'color: green' : 'color: red'">{{c.mainNetIn}}</span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!--弹出层时背景层DIV-->
+<div id="fade" class="black_overlay" onclick="CloseDiv()"></div>
+<div id="MyDiv" class="white_content" style="overflow-x:hidden; overflow-y:hidden;"></div>
+</body>
+
+<script>
+    var fcode = "all";
+    var h = location.href;
+    console.log(fcode);
+    if (h.indexOf("?") > 0) {
+        fcode = h.substr(h.indexOf("?") + 1);
+        console.log(fcode);
+    }
+    var fade = document.getElementById('fade');
+    var MyDiv = document.getElementById('MyDiv');
+    //关闭弹出层
+    fade.onclick = function () {
+        MyDiv.style.display = 'none';
+        fade.style.display = 'none';
+    };
+
+    // 异步请求函数必须要写在外面，然后在vue里面调用
+    function asyncLoadDate() {
+        axios.get(url + 'concept/list')
+            .then(function (response) {
+                if (response.status === 200) {
+                    vm.fillData(response);
+                }
+            }).catch(function (error) {
+            alert("系统异常");
+        });
+    }
+
+    var vm = new Vue({
+        el: "#app",
+        mounted: function () {
+            asyncLoadDate();
+        },
+        methods: {
+            fillData: function (response) {
+                let json = response.data;
+                this.tableData = json.data;
+                // console.log(JSON.stringify(this.tableData))
+            },
+            isHover: function (conceptCode) {
+                document.getElementById('vTable').querySelectorAll('.' + conceptCode).forEach(function (el) {
+                    el.style.backgroundColor = 'yellow';
+                });
+            },
+            isLeave: function (conceptCode) {
+                document.getElementById('vTable').querySelectorAll('.' + conceptCode).forEach(function (el) {
+                    el.style.backgroundColor = ''; // 或者设置回默认颜色或其他颜色
+                });
+            },
+            //弹出隐藏层
+            getJsonValue: function (json) {
+                console.log(json)
+            },
+            showFundDetail: function (conceptCode) {
+                if (fcode == "all") {
+                    MyDiv.style.left = '20%';
+                } else {
+                    MyDiv.style.left = '13%';
+                    MyDiv.style.top = '0';
+                }
+                MyDiv.style.width = '1150px';
+                MyDiv.style.height = '680px';
+                MyDiv.style.display = 'block';
+                fade.style.display = 'block';
+                MyDiv.innerHTML = '<object type="text/html" data="fundDetail.html?' + conceptCode + '" width="100%" height="99%"></object>';
+            },
+            showReportStock: function (conceptCode) {
+                if (fcode == "all") {
+                    MyDiv.style.left = '20%';
+                } else {
+                    MyDiv.style.left = '13%';
+                    MyDiv.style.top = '0';
+                }
+                MyDiv.style.width = '1150px';
+                MyDiv.style.height = '680px';
+                MyDiv.style.display = 'block';
+                fade.style.display = 'block';
+                MyDiv.innerHTML = '<object type="text/html" data="reportStock.html?' + conceptCode +
+                    '" width="100%" height="100%"></object>';
+
+            },
+        },
+        data: function () {
+            return {
+                isDragging: true,
+                hs_lb_title: '换手率=（某一段时期内的成交量）/（流通股）x 100% ，反映股票流通性强弱的指标之一\n' +
+                    '将换手率与股价走势相结合，可以股价做出一定的预测和判断。某只股票的换手率突然上升，成交量放大，可能意味着有投资者在大量买进，\n' +
+                    '股价可能会随之上扬。如果某只股票持续上涨了一个时期后，换手率又迅速上升，则可能意昧着一些获利者要套现，股价可能会下跌\n\n' +
+                    '量比=（现成交总手数 / 现累计开市时间(分) ）/ 过去5日平均每分钟成交量，衡量相对成交量的指标。\n' +
+                    '量比的数值越大，表明了该股当日流入的资金越多，市场活跃度越高；反之，量比值越小，说明了资金的流入越少，市场活跃度越低\n' +
+                    '0.8-1.5倍 正常水平\n' +
+                    '1.5-2.5倍 温和放量，如股价也处于温和缓升状态，则升势相对健康，可继续持股，如股价下跌，则可认定跌势难以在短期内结束，考虑停损退出\n' +
+                    '2.5-5  倍 明显放量，如股价相应地突破重要支撑或阻力位置，则突破有效的几率颇高，可以相应地采取行动\n' +
+                    '5-10   倍 剧烈放量，如个股处于长期低位出现剧烈放量突破，涨势的后续空间巨大；如个股已有巨大涨幅的情况下出现剧烈的放量，值得高度警惕\n' +
+                    '10倍以上 一般可以考虑反向操作，在涨势中出现这种情形，说明见顶的可能性压倒一切；阴跌的后期，突然巨大量比，说明彻底释放了下跌动能\n' +
+                    '20倍以上 是极端放量，如连续的上涨后，但股价出现“滞涨”现象，则涨势死亡信号；如股票在跌势中极端放量，则建仓的大好时机',
+                sylj_title: '静态市盈率=总市值/净利润，股票是否被高估或者低估的指标。股票必须属于同一个行业，每股收益比较接近，相互比较才有效。',
+                sygd_title: '滚动市盈率=总市值/过去四个季度净利润之和，更加准确，数据更新',
+                syld_title: '动态市盈率=总市值/预估净利润, 通常作为股票是便宜抑或昂贵的指标，动态市盈率小于静态市盈率说明这个股票的成长性好',
+                sjl_title: '市净率＝股价／每股净资产，一般来说市净率较低的股票，投资价值较高。在熊市投资者们乐于使用市净率指标，更能体现股票的安全边际',
+                jzcsyl_title: '净资产收益率=税后利润 / 所有者权益。衡量企业盈利能力，越高收益越多，说明公司对资本金的利用与管理越有效',
+                mgjzc_title: '每股净资产= 股东权益总额 / 股本总股数。反映每股股票所拥有的资产现值。每股净资产越高，股东拥有的每股资产价值越多；越高越好',
+                mgwfplr_title: '每股未分配利润=企业当期未分配利润总额/总股本，未分配利润是企业留待以后年度进行分配的结存利润，若为负数则为尚未弥补的亏损\n' +
+                    '未分配利润有两个方面的含义：一是留待以后年度分配的利润；二是尚未指定特定用途的利润',
+                dates: [],
+                tableData: []
+            };
+        },
+    });
+</script>
+
+</html>

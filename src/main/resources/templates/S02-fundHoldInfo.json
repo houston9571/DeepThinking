@@ -1,0 +1,117 @@
+{
+  "description": "基金持股",
+  "responseFormat": "HTML",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "executeJavaScript": false,
+  // http://quotes.money.163.com/f10/jjcg_601633.html
+  "url": "http://quotes.money.163.com/f10/jjcg_{scode}.html",
+  "factors": [
+    {
+      "modelName": "fundHoldInfo",
+      "xPath": "",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "截止日期",
+          "property": "expirationDate",
+          "xPath": "",
+          "xPattern": [
+            "截止(.*?)，共"
+          ]
+        },
+        {
+          "description": "概述",
+          "property": "gs",
+          "xPath": "",
+          "xPattern": [
+            "<p>截止(.*?)。</p>"
+          ]
+        },
+        {
+          "description": "基金持股家数",
+          "property": "cgjs",
+          "xPath": "",
+          "xPattern": [
+            "共(.*?)家基金持股"
+          ]
+        },
+        {
+          "description": "持仓量",
+          "property": "ccl",
+          "xPath": "",
+          "xPattern": [
+            "持仓量总计(.*?)万股"
+          ]
+        },
+        {
+          "description": "占流通A股",
+          "property": "ltbl",
+          "xPath": "",
+          "xPattern": [
+            "占流通A股(.*?)%"
+          ]
+        },
+        {
+          "description": "增仓家数",
+          "property": "zcjs",
+          "xPath": "",
+          "xPattern": [
+            "zcjs = (\\d+);"
+          ]
+        },
+        {
+          "description": "增持股票",
+          "property": "zcgp",
+          "xPattern": [
+            "zcgp = (\\d+(\\.\\d+));"
+          ]
+        },
+        {
+          "description": "减仓家数",
+          "property": "jcjs",
+          "xPattern": [
+            "jcjs = (\\d+);"
+          ]
+        },
+        {
+          "description": "减持股票",
+          "property": "jcgp",
+          "xPattern": [
+            "jcgp = (\\d+(\\.\\d+));"
+          ]
+        },
+        {
+          "description": "新进家数",
+          "property": "xjjs",
+          "xPattern": [
+            "xjjs = (\\d+);"
+          ]
+        },
+        {
+          "description": "新进股票",
+          "property": "xjgp",
+          "xPattern": [
+            "xjgp = (\\d+(\\.\\d+));"
+          ]
+        },
+        {
+          "description": "退出家数",
+          "property": "tcjs",
+          "xPattern": [
+            "tcjs = (\\d+);"
+          ]
+        },
+        {
+          "description": "退出股票",
+          "property": "tcgp",
+          "xPattern": [
+            "tcgp = (\\d+(\\.\\d+));"
+          ]
+        }
+      ]
+    }
+
+  ]
+}

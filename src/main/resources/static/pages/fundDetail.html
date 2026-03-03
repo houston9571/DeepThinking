@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="../css/theme-default-easytable.css" />
+		<script src="../js/config.js"></script>
+		<script src="https://unpkg.com/vue/dist/vue.js"></script>
+		<script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	</head>
+	<body style="overflow-y:hidden;">
+		<div id="app" style="font-size: 12px;">
+			<div style="white-space: nowrap;">
+				<div style="padding-left: 18px;font-size: small;display: inline-block;">{{title.scode}}</div>
+				<div style="padding: 10px; font-size: large; display: inline-block;">{{title.sname}}</div>
+				<div style="padding: 10px; font-size: small; display: inline-block;">最新价：<span :style="title.zdf>0 ? 'color: red' : 'color: green'">{{title.zxj}}</span></div>
+				<div style="padding: 10px; font-size: small; display: inline-block;">涨跌幅：<span :style="title.zdf>0 ? 'color: red' : 'color: green'">{{title.zdf+'%'}}</span></div>
+				<div style="padding: 10px; font-size: xx-small; display: inline-block;color: #888;">{{title.cdate}}</div>
+			</div>
+			<div style="padding-left: 18px; padding-block-end: 5px; font-size: x-small;color: #888;">截止{{title.gs}}</div>
+			<div class="ve-table">
+				<div class="ve-table-container ve-table-border-around" style="height: 600px;">
+					<table class="ve-table-content ve-table-border-x ve-table-border-y" style="width: 1000px;">
+						<thead class="ve-table-fixed-header ve-table-header">
+							<tr class="ve-table-header-tr">
+								<th class="ve-table-header-th" style="width: 50px;">序号</th>
+								<th class="ve-table-header-th" style="width: 200px;">基金</th>
+								<th class="ve-table-header-th" style="width: 100px;">最新市值</th>
+								<th class="ve-table-header-th" style="width: 100px;">持仓市值</th>
+								<th class="ve-table-header-th" style="width: 100px;">持仓股数</th>
+								<!-- <th class="ve-table-header-th" style="width: 100px;">与上期持仓股数变化</th> -->
+								<!-- <th class="ve-table-header-th" style="width: 100px;">占基金净值比例</th> -->
+								<th class="ve-table-header-th" style="width: 100px;">占流通股比例</th>
+							</tr>
+						</thead>
+						<tbody class="ve-table-body ve-table-stripe ve-table-row-hover ve-table-row-highlight">
+							<tr style="height: 0px;">
+								<td style="padding: 0px; border: 0px; height: 0px;"></td>
+							</tr>
+							<tr class="ve-table-body-tr" v-for="(col,index) in tableData">
+								<td class="ve-table-body-td" style="text-align: center;">{{index+1}}</td>
+								<td class="ve-table-body-td" style="text-align: left;padding-left: 10px;">
+									<a :href="'http://fundf10.eastmoney.com/jbgk_'+col.fcode+'.html'" target="_blank">
+										<font style="color: #888">{{col.fcode}}</font> {{col.fname}}
+									</a>
+								</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 40px;">{{col.zxsz}}</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 40px;">{{col.ccsz}}</td>
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 40px;">{{col.ccgs}}</td>
+								<!-- <td class="ve-table-body-td" style="text-align: left;padding-left: 40px;">{{col.ccbh}}</td> -->
+								<!-- <td class="ve-table-body-td" style="text-align: right;padding-right: 40px;">{{col.jzbl}}%</td> -->
+								<td class="ve-table-body-td" style="text-align: right;padding-right: 40px;">{{col.ltbl}}%</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+
+	<script>
+		var h = location.href;
+		var scode = '';
+		if (h.indexOf("?") > 0) {
+			scode = h.substr(h.indexOf("?") + 1);
+		}
+		// 异步请求函数必须要写在外面，然后在vue里面调用
+		function asyncLoadDate() {
+			axios.get(url + 'fundDetail/' + scode)
+				.then(function(response) {
+					if (response.status == 200) {
+						vm.fillData(response);
+					}
+				})
+				.catch(function(error) {
+					alert("系统异常");
+				});
+		}
+		var vm = new Vue({
+			el: "#app",
+			mounted: function() {
+				asyncLoadDate();
+			},
+			methods: {
+				fillData: function(response) {
+					let json = response.data;
+					this.title = json.columns[0];
+					this.tableData = json.data;
+				}
+			},
+			data: function() {
+				return {
+					title: {},
+					tableData: []
+				};
+			},
+		});
+	</script>
+ 
+</html>

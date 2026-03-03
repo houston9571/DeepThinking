@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="../css/theme-default-easytable.css"/>
+    <link rel="stylesheet" href="../css/my.css"/>
+    <script src="../js/config.js"></script>
+    <script src="../js/Sortable.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/axios.min.js"></script>
+</head>
+<body>
+<div id="app" style="font-size: 12px;">
+    <div class="ve-table">
+        <li class="ve-table-container ve-table-border-around" id="vDiv" style="max-height: 900px; ">
+            <table class="ve-table-content ve-table-border-x ve-table-border-y" id="vTable">
+                <thead class="ve-table-fixed-header ve-table-header">
+                <tr class="ve-table-header-tr">
+                    <th class="ve-table-header-th" style="width: 158px;" v-for="(col, index) in tableData[0]" v-if="index < sellIndex" @click="showPartnerDetail(col.partnerCode)">
+                        <div class="td-flex">
+                            <span class="center" style="width: 100%; font-size: 16px;">{{col.partnerName}}</span>
+                        </div>
+                        <div class="td-flex">
+                            <span class="center" style="width: 100%; font-size: 12px; color: red;">{{col.netBuyAmount}}  {{col.totalNetBuyRatio}} </span>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="sort" class="ve-table-body ve-table-stripe ve-table-row-hover ve-table-row-highlight">
+                <tr>
+                    <td style="vertical-align: top;padding: 3px !important;" v-for="(col, index) in tableData" v-if="index > 0 && index <= sellIndex">
+                        <ul style="width: 100%; margin-bottom: 4px; padding: 2px; border: 0.4px solid #fef6f5;"
+                            v-for="c in col" :class="'s'+c.stockCode" @mouseenter="isHover('s'+c.stockCode)" @mouseleave="isLeave('s'+c.stockCode)">
+                            <!--                            :style="c.changePercent.startsWith('-') ? 'background: linear-gradient(#edf9f0, #fff);' : 'background: linear-gradient(#fef6f5, #fff);'"-->
+                            <li>
+                                <div class="td-flex" style="justify-content: left;" @click="showStockDetail(c.stockCode)">
+                                    <span class="right" style="width: 50%; font-size: 16px;">{{c.stockName}}</span>
+                                    <span class="right" style="width: 40%;" :style="c.changePercent.startsWith('-') ? 'color: green' : 'color: red'">{{c.changePercent}}</span>
+                                </div>
+                                <div class="td-flex" style="font-size: 11px;" v-for="(p, index) in c.partners"
+                                     :style="(c.partnerName==p.partnerName && p.netBuyAmount.startsWith('-')) ? 'background: linear-gradient(to right, #abf0ab, #f1f1c2); border-radius: 1px; box-shadow: rgba(0.2, 0.2, 0.2, 0.2) 0px 3px 6px;'
+                                            : ((c.partnerName==p.partnerName && !p.netBuyAmount.startsWith('-')) ? 'background: linear-gradient(to right, #f2b8b8, #f1f1c2); border-radius: 1px; box-shadow: rgba(0.2, 0.2, 0.2, 0.2) 0px 3px 6px;' : '')">
+                                    <span class="left" style="width: 57px;" :style="p.netBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.partnerName}}</span>
+                                    <span class="right" style="width: 45px;" :style="p.netBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.netBuyAmount}}</span>
+                                    <span class="right" style="width: 42px;" :style="p.netBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.totalNetBuyRatio}}</span>
+                                </div>
+
+                                <!-- <div class="td-flex" style="display: inline-table;">
+                                     <span class="right" style="font-size: 10px;display: inline-block;color: red; border: 0.2px solid #f00; border-radius: 1px;box-shadow: 0 3px 6px rgba(0,0,0,0.2);">
+                                         中山东路
+                                     </span>
+                                 </div>-->
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <table class="ve-table-content ve-table-border-x ve-table-border-y" id="vTable2">
+                <thead class="ve-table-fixed-header ve-table-header">
+                <tr class="ve-table-header-tr">
+                    <th class="ve-table-header-th" style="width: 158px;" v-for="key in sellIndex" :key="key" @click="showPartnerDetail(tableData[0][key+sellIndex-1].partnerCode)">
+                        <div class="td-flex" v-if="tableData[0][key+sellIndex-1] != null">
+                            <span class="center" style="width: 100%; font-size: 16px;">{{tableData[0][key+sellIndex-1].partnerName}}</span>
+                        </div>
+                        <div class="td-flex" v-if="tableData[0][key+sellIndex-1] != null">
+                            <span class="center" style="width: 100%; font-size: 12px; color: green;">{{tableData[0][key+sellIndex-1].netBuyAmount}}  {{tableData[0][key+sellIndex-1].totalNetBuyRatio}}</span>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="ve-table-body ve-table-stripe ve-table-row-hover ve-table-row-highlight">
+                <tr>
+                    <td style="vertical-align: top;padding: 3px !important;" v-for="(col, index) in tableData" v-if="index > sellIndex">
+                        <ul style="width: 100%; margin-bottom: 4px; padding: 2px; border: 0.4px solid #fef6f5;"
+                            v-for="c in col" :class="'s'+c.stockCode" @mouseenter="isHover('s'+c.stockCode)" @mouseleave="isLeave('s'+c.stockCode)">
+                            <!--                            :style="c.changePercent.startsWith('-') ? 'background: linear-gradient(#edf9f0, #fff);' : 'background: linear-gradient(#fef6f5, #fff);'"-->
+                            <li>
+                                <div class="td-flex" style="justify-content: left;" @click="showStockDetail(c.stockCode)">
+                                    <span class="right" style="width: 50%; font-size: 16px;">{{c.stockName}}</span>
+                                    <span class="right" style="width: 40%;" :style="c.changePercent.startsWith('-') ? 'color: green' : 'color: red'">{{c.changePercent}}</span>
+                                </div>
+                                <div class="td-flex" style="font-size: 11px; " v-for="(p, index) in c.partners"
+                                     :style="(c.partnerName==p.partnerName && p.netBuyAmount.startsWith('-')) ? 'background: linear-gradient(to right, #abf0ab, #f1f1c2); border-radius: 1px; box-shadow: rgba(0.2, 0.2, 0.2, 0.2) 0px 3px 6px;'
+                                            : ((c.partnerName==p.partnerName && !p.netBuyAmount.startsWith('-')) ? 'background: linear-gradient(to right, #f2b8b8, #f1f1c2); border-radius: 1px; box-shadow: rgba(0.2, 0.2, 0.2, 0.2) 0px 3px 6px;' : '')">
+                                    <span class="left" style="width: 57px;" :style="p.netBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.partnerName}}</span>
+                                    <span class="right" style="width: 45px;" :style="p.netBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.netBuyAmount}}</span>
+                                    <span class="right" style="width: 42px;" :style="p.netBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.totalNetBuyRatio}}</span>
+                                </div>
+
+                                <!-- <div class="td-flex" style="display: inline-table;">
+                                     <span class="right" style="font-size: 10px;display: inline-block;color: red; border: 0.2px solid #f00; border-radius: 1px;box-shadow: 0 3px 6px rgba(0,0,0,0.2);">
+                                         中山东路
+                                     </span>
+                                 </div>-->
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+    </div>
+</div>
+</div>
+<!--弹出层时背景层DIV-->
+<div id="fade" class="black_overlay" onclick="CloseDiv()"></div>
+<div id="MyDiv" class="white_content" style="overflow-x:hidden; overflow-y:hidden;"></div>
+</body>
+
+<script>
+    var fcode = "all";
+    var h = location.href;
+    console.log(fcode);
+    if (h.indexOf("?") > 0) {
+        fcode = h.substr(h.indexOf("?") + 1);
+        console.log(fcode);
+    }
+    var fade = document.getElementById('fade');
+    var MyDiv = document.getElementById('MyDiv');
+    //关闭弹出层
+    fade.onclick = function () {
+        MyDiv.style.display = 'none';
+        fade.style.display = 'none';
+    };
+
+    // 异步请求函数必须要写在外面，然后在vue里面调用
+    function asyncLoadDate() {
+        axios.get(url + 'dragon/partner/2026-02-13').then(function (response) {
+            if (response.status === 200) {
+                vm.fillData(response);
+            }
+        }).catch(function (error) {
+            alert("系统异常");
+        });
+    }
+
+    var vm = new Vue({
+        el: "#app",
+        mounted: function () {
+            asyncLoadDate();
+        },
+        methods: {
+            fillData: function (response) {
+                let json = response.data;
+                this.tableData = json.data;
+                this.tableData[0].forEach((item, index) => {
+                    if (this.sellIndex === 0 && item.netBuyAmount.startsWith('-')) {
+                        this.sellIndex = index;
+                        console.log(`索引 ${index}: ${item}`);
+                    }
+                });
+                // console.log(JSON.stringify(this.tableData))
+            },
+            isHover: function (stockCode) {
+                document.getElementById('vTable').querySelectorAll('.' + stockCode).forEach(function (el) {
+                    el.style.backgroundColor = 'yellow';
+                });
+                document.getElementById('vTable2').querySelectorAll('.' + stockCode).forEach(function (el) {
+                    el.style.backgroundColor = 'yellow';
+                });
+            },
+            isLeave: function (stockCode) {
+                document.getElementById('vTable').querySelectorAll('.' + stockCode).forEach(function (el) {
+                    el.style.backgroundColor = ''; // 或者设置回默认颜色或其他颜色
+                });
+                document.getElementById('vTable2').querySelectorAll('.' + stockCode).forEach(function (el) {
+                    el.style.backgroundColor = ''; // 或者设置回默认颜色或其他颜色
+                });
+            },
+            //弹出隐藏层
+            getJsonValue: function (json) {
+                console.log(json)
+            },
+            showPartnerDetail: function (partnerCode) {
+                MyDiv.style.width = '1150px';
+                MyDiv.style.height = '680px';
+                MyDiv.style.display = 'block';
+                fade.style.display = 'block';
+                MyDiv.innerHTML = '<object type="text/html" data="dragonDetailPartner.html?partnerCode=' + partnerCode + '" width="100%" height="99%"></object>';
+            },
+            showStockDetail: function (stockCode) {
+                MyDiv.style.width = '1500px';
+                MyDiv.style.height = '680px';
+                MyDiv.style.display = 'block';
+                fade.style.display = 'block';
+                MyDiv.innerHTML = '<object type="text/html" data="dragonDetailStock.html?stockCode=' + stockCode + '" width="100%" height="100%"></object>';
+
+            },
+        },
+        data: function () {
+            return {
+                sellIndex: 0,
+                dates: [],
+                tableData: []
+            };
+        },
+    });
+</script>
+
+</html>

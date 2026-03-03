@@ -1,0 +1,100 @@
+{
+  "description": "北向资金-个股",
+  "responseFormat": "JSON",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "executeJavaScript": false,
+  // url特殊字符需要转义
+  // http://dcfm.eastmoney.com/EM_MutiSvcExpandInterface/api/js/get?type=HSGT20_GGTJ_SUM&token=894050c76af8597a853f5b408b759f5d&st=ShareSZ_Chg_One&sr=-1&p=1&ps=50&filter=%28DateType=%271%27%29&rt=53762868
+  "url": "http://dcfm.eastmoney.com/EM_MutiSvcExpandInterface/api/js/get?type=HSGT20_GGTJ_SUM&token=894050c76af8597a853f5b408b759f5d&st=ShareSZ_Chg_One&sr=-1&p={pageNo}&ps={pageSize}&filter=%28DateType=%271%27%29&rt=53762868",
+  "factors": [
+    {
+      "modelName": "northStockData",
+      "xPath": "",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "MANY",
+      "subsets": [
+        {
+          "description": "日期",
+          "property": "hdDate",
+          "xPath": "$.HdDate"
+        },
+        {
+          "description": "股票代码",
+          "property": "code",
+          "xPath": "$.SCode"
+        },
+        {
+          "description": "股票名称",
+          "property": "sname",
+          "xPath": "$.SName"
+        },
+        {
+          "description": "行业",
+          "property": "hy",
+          "xPath": "$.HYName"
+        },
+        {
+          "description": "行业代码",
+          "property": "hycode",
+          "xPath": "$.ORIGINALCODE"
+        },
+        {
+          "description": "地区",
+          "property": "dq",
+          "xPath": "$.DQName"
+        },
+        {
+          "description": "地区代码",
+          "property": "dqcode",
+          "xPath": "$.DQCode"
+        },
+        {
+          "description": "持股",
+          "property": "cg",
+          "xPath": "$.ShareHold"
+        },
+        {
+          "description": "市值",
+          "property": "sz",
+          "xPath": "$.ShareSZ"
+        },
+        {
+          "description": "占流通股比%",
+          "property": "zltgb",
+          "xPath": "$.LTZB"
+        },
+        {
+          "description": "占总股本比%",
+          "property": "zzgbb",
+          "xPath": "$.ZZB"
+        },
+        {
+          "description": "增持股数",
+          "property": "zcgs",
+          "xPath": "$.ShareHold_Chg_One"
+        },
+        {
+          "description": "增持市值",
+          "property": "zcsz",
+          "xPath": "$.ShareSZ_Chg_One"
+        },
+        {
+          "description": "增持市值增幅",
+          "property": "zcszzf",
+          "xPath": "$.ShareSZ_Chg_Rate_One"
+        },
+        {
+          "description": "增持占流通股比%",
+          "property": "zczltgb",
+          "xPath": "$.LTZB_One"
+        },
+        {
+          "description": "增持占总股本比%",
+          "property": "zczzgbb",
+          "xPath": "$.ZZB_One"
+        }
+      ]
+    }
+  ]
+}
