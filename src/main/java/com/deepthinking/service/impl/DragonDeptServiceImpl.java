@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.deepthinking.client.EastMoneyDragonApi;
 import com.deepthinking.common.thread.Threads;
 import com.deepthinking.common.utils.NumberUtils;
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.DragonDept;
 import com.deepthinking.mysql.entity.OrgDept;

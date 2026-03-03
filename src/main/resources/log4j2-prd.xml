@@ -35,7 +35,7 @@
         <logger name="org.springframework.context" level="info"/>
         <logger name="org.springframework.web" level="info"/>
         <logger name="com.gargoylesoftware.htmlunit" level="OFF"/>
-        <logger name="com.optimus" level="info" includeLocation="true" additivity="false">
+        <logger name="com.deepthinking" level="info" includeLocation="true" additivity="false">
             <appender-ref ref="FileLog"/>
             <appender-ref ref="Console"/>
         </logger>

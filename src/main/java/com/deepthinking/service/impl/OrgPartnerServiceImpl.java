@@ -1,6 +1,6 @@
 package com.deepthinking.service.impl;
 
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.OrgPartner;
 import com.deepthinking.mysql.mapper.OrgPartnerMapper;

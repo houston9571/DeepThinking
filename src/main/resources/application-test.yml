@@ -1,0 +1,123 @@
+################ spring boot config ###############
+server:
+  port: 8088
+  servlet:
+    context-path: /
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"    
+spring:
+  application:
+    name: game-platform-admin
+  boot:
+    admin:
+      client:
+        url: http://springbootadmin.hlw.com:9710
+        username: user
+        password: password    
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    name: game-platform
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql.ccs.com:3306/game_platform?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&tinyInt1isBit=false&allowMultiQueries=true
+    username: root
+    password: line=7.98475b++
+    hikari:
+      pool-name: DatebookHikariCP
+      auto-commit: true
+      connection-test-query: SELECT 1
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1765000
+      maximum-pool-size: 5
+      minimum-idle: 1
+  data:
+    mongodb:
+      uri: mongodb://10.170.0.9:20000/admin
+      database: game_platform
+  redis:
+    database: 0
+    host: redis.ccs.com
+    port: 6379
+#    cluster:
+#      nodes: redis.ccs.com:8002,redis.ccs.com:8003,redis.ccs.com:8004,redis.ccs.com:8005,redis.ccs.com:8006,redis.ccs.com:8007
+#      max-redirects: 3
+#      lettuce:
+#        pool:
+#          max-idle: 64
+#          min-idle: 1
+#          max-active: 512
+#      redisson:
+#        # 配置参考：https://github.com/redisson/redisson/wiki/2.-%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95#23-%E5%B8%B8%E7%94%A8%E8%AE%BE%E7%BD%AE
+#        lockWatchdogTimeout: 30000 # 监控锁的看门狗超时防止分布式锁死锁，单位：毫秒
+    lettuce:
+      pool:
+        max-active: 100 # 连接池最大连接数（使用负值表示没有限制）
+        max-idle: 20 # 连接池中的最大空闲连接
+        min-idle: 5 # 连接池中的最小空闲连接
+        max-wait: 2000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
+jetcache:
+  statIntervalMinutes: 10                 # 控制台输出统计数据，统计间隔（单位分钟），0表示不统计
+  areaInCacheName: false                  # 是否加入缓存key前缀
+  local:
+    default:
+      type: caffeine                      # 缓存类型。linkedhashmap、caffeine为当前支持的本地缓存类型
+      keyConvertor: fastjson2
+      expireAfterAccessInMillis: 60000   # 10分钟后本地缓存失效
+  remote:
+    default:
+      type: redis.lettuce                 #使用lettuce为当前支持的远程缓存
+      keyConvertor: fastjson2
+      expireAfterWriteInMillis: 60000   # 1小时后远程缓存失效，单位毫秒
+      valueEncoder: java
+      valueDecoder: java
+      poolConfig:
+        minIdle: 5
+        maxIdle: 20
+        maxTotal: 50
+      readFrom: masterPreferred #master优先
+      uri: redis://redis.ccs.com:6379
+#      uri:
+#        - redis://@redis.ccs.com:8002
+#        - redis://@redis.ccs.com:8003
+#        - redis://@redis.ccs.com:8004
+#        - redis://@redis.ccs.com:8005
+#        - redis://@redis.ccs.com:8006
+#        - redis://@redis.ccs.com:8007
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+logging:
+  config: classpath:log4j2-test.xml
+  file: 
+      name: logs/game-platform-admin.log  
+#  level:
+#    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+
+forest:
+  backend: okhttp3             # 后端HTTP框架 okhttp3 httpclient
+  max-connections: 1000        # 连接池最大连接数（默认为 500）
+  max-route-connections: 500   # 每个路由的最大连接数（默认为 500）
+  max-request-queue-size: 100  # 最大请求等待队列大小
+  max-async-thread-size: 300   # 最大异步线程数
+  max-async-queue-size: 16     # 最大异步线程池队列大小
+  connect-timeout: 10000       # 连接超时时间，单位为毫秒（默认为 timeout）
+  read-timeout: 10000          # 数据读取超时时间，单位为毫秒（默认为 timeout）
+  max-retry-count: 0           # 请求失败后重试次数（默认为 0 次不重试）
+  ssl-protocol: TLS            # 单向验证的HTTPS的默认TLS协议（默认为 TLS）
+  log-enabled: true            # 打开或关闭日志（默认为 true）
+  log-request: true            # 打开/关闭Forest请求日志（默认为 true）
+  log-response-status: true    # 打开/关闭Forest响应状态日志（默认为 true）
+  log-response-content: true   # 打开/关闭Forest响应内容日志（默认为 false）
+  async-mode: platform         # 异步模式（默认为 platform）
+  success-when: com.optimus.ext.ForestSuccessCondition
+  log-handler: com.optimus.ext.ForestLogHandler

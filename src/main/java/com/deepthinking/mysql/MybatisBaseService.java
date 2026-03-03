@@ -4,7 +4,7 @@ package com.deepthinking.mysql;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.deepthinking.common.exception.ServiceException;
-import com.deepthinking.core.base.PageInfo;
+import com.deepthinking.ext.base.PageInfo;
 import com.deepthinking.mysql.entity.BaseEntity;
 
 import java.io.Serializable;

@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.deepthinking.client.EastMoneyStockApi;
 import com.deepthinking.common.utils.StringUtil;
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.ConceptInfo;
 import com.deepthinking.mysql.entity.ConceptStock;
@@ -34,7 +34,7 @@ import java.util.Map;
 import static com.deepthinking.common.constant.Constants.LABEL_DATA;
 import static com.deepthinking.common.constant.Constants.LABEL_RESULT;
 import static com.deepthinking.common.enums.ErrorCode.*;
-import static com.deepthinking.core.components.MarketType.*;
+import static com.deepthinking.common.constant.MarketType.*;
 
 @Slf4j
 @Service

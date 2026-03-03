@@ -1,8 +1,8 @@
 package com.deepthinking.mysql.vo;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.deepthinking.core.ext.CountUtilWriter;
-import com.deepthinking.core.ext.PercentageWriter;
+import com.deepthinking.ext.serialize.CountUtilWriter;
+import com.deepthinking.ext.serialize.PercentageWriter;
 import lombok.Data;
 
 import java.math.BigDecimal;

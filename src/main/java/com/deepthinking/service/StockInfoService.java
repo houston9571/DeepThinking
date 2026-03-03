@@ -1,6 +1,6 @@
 package com.deepthinking.service;
 
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.MybatisBaseService;
 import com.deepthinking.mysql.entity.StockInfo;
 

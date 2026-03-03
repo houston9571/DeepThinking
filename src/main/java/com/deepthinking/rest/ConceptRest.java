@@ -1,7 +1,7 @@
 package com.deepthinking.rest;
 
-import com.deepthinking.core.base.PageResult;
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.PageResult;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.entity.ConceptDelay;
 import com.deepthinking.service.ConceptDelayService;
 import lombok.RequiredArgsConstructor;

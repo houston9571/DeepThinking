@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.deepthinking.client.EastMoneyConceptApi;
 import com.deepthinking.common.utils.DateUtils;
-import com.deepthinking.core.components.MarketType;
+import com.deepthinking.common.constant.MarketType;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.ConceptDelay;
 import com.deepthinking.mysql.mapper.ConceptDelayMapper;

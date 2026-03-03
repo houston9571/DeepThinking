@@ -1,6 +1,6 @@
 package com.deepthinking.service;
 
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.entity.DragonStock;
 import com.deepthinking.mysql.vo.DragonDetailPartner;
 import com.deepthinking.mysql.vo.DragonDetailStockKline;

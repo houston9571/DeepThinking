@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.deepthinking.client.EastMoneyStockApi;
-import com.deepthinking.core.components.MarketType;
+import com.deepthinking.common.constant.MarketType;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.StockKlineDaily;
 import com.deepthinking.mysql.mapper.StockKlineDailyMapper;

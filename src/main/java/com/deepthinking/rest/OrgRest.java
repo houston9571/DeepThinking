@@ -1,6 +1,6 @@
 package com.deepthinking.rest;
 
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.entity.OrgDept;
 import com.deepthinking.mysql.entity.OrgPartner;
 import com.deepthinking.service.OrgDeptService;

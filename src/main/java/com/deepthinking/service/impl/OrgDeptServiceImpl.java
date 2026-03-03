@@ -1,7 +1,7 @@
 package com.deepthinking.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.OrgDept;
 import com.deepthinking.mysql.mapper.OrgDeptMapper;

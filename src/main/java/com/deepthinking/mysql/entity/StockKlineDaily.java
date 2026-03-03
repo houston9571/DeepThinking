@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.deepthinking.core.ext.*;
+import com.deepthinking.ext.serialize.*;
 import lombok.*;
 
 import java.math.BigDecimal;

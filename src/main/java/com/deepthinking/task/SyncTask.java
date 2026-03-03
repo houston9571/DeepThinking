@@ -1,7 +1,7 @@
 package com.deepthinking.task;
 
 import com.deepthinking.common.utils.DateUtils;
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

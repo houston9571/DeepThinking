@@ -2,7 +2,7 @@ package com.deepthinking.rest;
 
 
 import com.alibaba.fastjson2.JSONObject;
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.service.StockKlineDailyService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.deepthinking.rest;
 
-import com.deepthinking.core.base.PageInfo;
-import com.deepthinking.core.base.PageResult;
+import com.deepthinking.ext.base.PageInfo;
+import com.deepthinking.ext.base.PageResult;
 import com.deepthinking.mysql.entity.StockInfo;
 import com.deepthinking.service.StockInfoService;
 import com.deepthinking.service.StockKlineDailyService;

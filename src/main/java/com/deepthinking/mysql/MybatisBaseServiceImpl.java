@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.deepthinking.common.utils.DateUtils;
 import com.deepthinking.common.utils.StringUtil;
-import com.deepthinking.core.base.PageInfo;
+import com.deepthinking.ext.base.PageInfo;
 import com.deepthinking.mysql.entity.BaseEntity;
 import com.google.common.base.CaseFormat;
 import lombok.extern.slf4j.Slf4j;

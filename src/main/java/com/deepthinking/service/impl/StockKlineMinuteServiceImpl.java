@@ -7,9 +7,9 @@ import com.deepthinking.client.EastMoneyH5Api;
 import com.deepthinking.client.EastMoneyStockApi;
 import com.deepthinking.common.enums.DateFormatEnum;
 import com.deepthinking.common.utils.DateUtils;
-import com.deepthinking.core.base.Result;
-import com.deepthinking.core.components.MarketType;
-import com.deepthinking.core.components.StockCodeUtils;
+import com.deepthinking.ext.base.Result;
+import com.deepthinking.common.constant.MarketType;
+import com.deepthinking.common.constant.StockCodeUtils;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.StockKlineMinute;
 import com.deepthinking.mysql.mapper.StockKlineMinuteMapper;
@@ -27,7 +27,7 @@ import java.util.Map;
 import static cn.hutool.core.text.StrPool.COMMA;
 import static com.deepthinking.common.constant.Constants.LABEL_DATA;
 import static com.deepthinking.common.enums.ErrorCode.NOT_GET_PAGE_ERROR;
-import static com.deepthinking.core.components.StockConstants.KLINE_1MIN;
+import static com.deepthinking.common.constant.StockConstants.KLINE_1MIN;
 
 @Slf4j
 @Service

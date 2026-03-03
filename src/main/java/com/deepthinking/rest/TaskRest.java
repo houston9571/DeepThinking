@@ -3,7 +3,7 @@ package com.deepthinking.rest;
 import com.deepthinking.common.thread.Threads;
 import com.deepthinking.common.utils.DateUtils;
 import com.deepthinking.common.utils.NumberUtils;
-import com.deepthinking.core.base.Result;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.entity.DragonStock;
 import com.deepthinking.mysql.entity.StockKlineMinute;
 import com.deepthinking.service.*;
