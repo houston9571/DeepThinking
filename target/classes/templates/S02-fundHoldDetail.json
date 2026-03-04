@@ -1,0 +1,57 @@
+{
+  "description": "基金持股明细",
+  "responseFormat": "JSON",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "executeJavaScript": false,
+  // http://data.eastmoney.com/dataapi/zlsj/detail?SHType=1&SHCode=&SCode=600519&sortField=ReportDate&sortDirec=1&pageNum=2&pageSize=50
+  "url": "http://data.eastmoney.com/dataapi/zlsj/detail?SHType=1&SHCode=&SCode={scode}&sortField=ReportDate&sortDirec=1&pageNum={pageNo}&pageSize={pageSize}",
+  "factors": [
+    {
+      "modelName": "fundHoldDetail",
+      "xPath": "$.data",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "MANY",
+      "subsets": [
+        {
+          "description": "股票名称",
+          "property": "scode",
+          "xPath": "$.f0",
+          "xPattern": [
+            "(.*?)\\."
+          ]
+        },
+        {
+          "description": "截止日期",
+          "property": "expirationDate",
+          "xPath": "$.f2"
+        },
+        {
+          "description": "基金代码",
+          "property": "fcode",
+          "xPath": "$.f3"
+        },
+        {
+          "description": "基金名称",
+          "property": "fname",
+          "xPath": "$.f4"
+        },
+        {
+          "description": "持仓市值",
+          "property": "ccsz",
+          "xPath": "$.f10"
+        },
+        {
+          "description": "持仓股数",
+          "property": "ccgs",
+          "xPath": "$.f9"
+        },
+        {
+          "description": "占流通股比例",
+          "property": "ltbl",
+          "xPath": "$.f12"
+        }
+      ]
+    }
+  ]
+}

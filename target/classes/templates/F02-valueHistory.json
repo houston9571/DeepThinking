@@ -1,0 +1,147 @@
+{
+  "description": "历史净值",
+  "responseFormat": "HTML",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "executeJavaScript": false,
+  // http://fund.eastmoney.com/005827.html
+  "url": "http://fund.eastmoney.com/{fcode}.html",
+  "factors": [
+    {
+      "modelName": "valueHistory",
+      "xPath": "div.fundDetail-main>div.fundInfoItem>div.dataOfFund",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "净值日期",
+          "property": "date",
+          "xPath": "dl.dataItem02>dt",
+          "xPattern": [
+            "(\\d{4}-\\d{1,2}-\\d{1,2})"
+          ]
+        },
+        {
+          "description": "单位净值",
+          "property": "dwjz",
+          "xPath": "dl.dataItem02>dd.dataNums>span[0]"
+        },
+        {
+          "description": "涨跌幅",
+          "property": "zdf",
+          "xPath": "dl.dataItem02>dd.dataNums>span[1]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        },
+        {
+          "description": "累计净值",
+          "property": "ljjz",
+          "xPath": "dl.dataItem03>dd.dataNums>span"
+        },
+        {
+          "description": "成立以来",
+          "property": "clyl",
+          "xPath": "dl.dataItem03>dd[2]>span[1]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        }
+      ]
+    },
+    {
+      "modelName": "fundIncrease",
+      "xPath": "li#increaseAmount_stage>table>tbody>tr[1]",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "近1周",
+          "property": "jyz",
+          "xPath": "td[1]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        },
+        {
+          "description": "近1月",
+          "property": "jyy",
+          "xPath": "td[2]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        },
+        {
+          "description": "近3月",
+          "property": "jsy",
+          "xPath": "td[3]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        },
+        {
+          "description": "近6月",
+          "property": "jly",
+          "xPath": "td[4]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        },
+        {
+          "description": "今年以来",
+          "property": "jnyl",
+          "xPath": "td[5]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        },
+        {
+          "description": "近1年",
+          "property": "jyn",
+          "xPath": "td[6]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        },
+        {
+          "description": "近2年",
+          "property": "jln",
+          "xPath": "td[7]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        },
+        {
+          "description": "近3年",
+          "property": "jsn",
+          "xPath": "td[8]",
+          "xPattern": [
+            "(.*?)%"
+          ]
+        }
+      ]
+    },
+    {
+      "modelName": "fundFormance",
+      "xPath": "li.performanceEvaluation.hasLoading",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "评价日期",
+          "property": "pjrq",
+          "xPath": "div[0]",
+          "xPattern": [
+            "(\\d{4}-\\d{1,2}-\\d{1,2})"
+          ]
+        },
+        {
+          "description": "基金特点",
+          "property": "jjtd",
+          "xPath": "div[2]",
+          "xAttribute": "data-content"
+        }
+      ]
+    }
+  ]
+}

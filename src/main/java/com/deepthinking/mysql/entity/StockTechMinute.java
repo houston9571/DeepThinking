@@ -30,15 +30,17 @@ public class StockTechMinute extends BaseEntity {
 
     private LocalDate tradeDate;
     private LocalTime tradeTime;
-    private BigDecimal price;
     private BigDecimal high;
     private BigDecimal low;
     private BigDecimal open;
     private BigDecimal close;
     private Long volume;
+    private Long amount;
+    private Long totalVolume;
+    private Long totalAmount;
     private BigDecimal volumeRatio;
-    private short signalType;
-    private short signalLevel;
+    private Short signalType;
+    private Short signalLevel;
     private String signalResult;
 
     private BigDecimal ema3;
@@ -88,5 +90,30 @@ public class StockTechMinute extends BaseEntity {
     private Short sellScore;
     private String sellReason;
 
+    /**
+     * 主力净流入 = 超大单净流入 + 大单净流入
+     * 散户净流入 = 中单净流入 + 小单净流入
+     */
+    private String mainNetIn;
+
+    /**
+     * 超大单净流入 Super Large Net Inflow	> 100万元	机构、顶级大户
+     */
+    private String superLargeNetIn;
+
+    /**
+     * 大单净流入	Large Net Inflow	20万 - 100万元	大户、部分机构
+     */
+    private String largeNetIn;
+
+    /**
+     * 中单净流入	Medium Net Inflow	4万 - 20万元	中户
+     */
+    private String mediumNetIn;
+
+    /**
+     * 小单净流入	Small Net Inflow	< 4万元	散户
+     */
+    private String smallNetIn;
 
 }

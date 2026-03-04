@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>DeepThink Quant</title>
+    <script src="../js/vue.min.js"></script>
+</head>
+<body>
+<div class="head-nav">
+    <div class="head-nav-con clearFloat">
+        <ul>
+            <li><a href="pages/concept.html" target="my_iframe">概念排名</a></li>
+            <li><a href="pages/dragonPartner.html" target="my_iframe">游资榜</a></li>
+            <li><a href="pages/dragonDept.html" target="my_iframe">个股榜</a></li>
+            <li><a href="pages/stock.html" target="my_iframe">股票行情</a></li>
+            <li><a href="pages/fund.html" target="my_iframe">基金行情</a></li>
+            <li><a href="http://data.eastmoney.com/zjlx/detail.html" target="_blank">资金分析</a></li>
+            <li class="drop-down"><a href="http://data.eastmoney.com/hsgtcg/" target="_blank">北向资金</a>
+                <ul class="drop-down-content">
+                    <li><a href="#" target="my_iframe">个股</a></li>
+                    <li><a href="#" target="my_iframe">板块</a></li>
+                </ul>
+            </li>
+            <li><a href="http://data.eastmoney.com/report" target="_blank">个股研报</a></li>
+        </ul>
+    </div>
+</div>
+<div id="app" style="position:absolute; top: 50px; width: 100%; height: 100%">
+    <iframe name="my_iframe"  style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" src="pages/concept.html"></iframe>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: "#app",
+        mounted() {
+        },
+
+        methods: {
+            setIframeHeight(event) {
+                const iframe = event.target
+                try {
+                    // 方法1：通过 contentWindow 获取内容高度
+                    const height = iframe.contentWindow.document.documentElement.scrollHeight
+                    iframe.style.height = height + 'px'
+                    // 方法2：确保没有滚动条
+                    iframe.style.overflow = 'hidden'
+                    console.log('iframe 高度设置为:', height)
+                } catch (e) {
+                    console.warn('无法设置iframe高度（跨域限制）', e)
+                }
+            }
+        }
+    });
+
+</script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    body,
+    html {
+        overflow: hidden !important;
+        height: 100vh !important;
+        position: fixed !important;
+        width: 100% !important;
+        font-size: 14px;
+        /*font-family: 'Microsoft Yahei', '微软雅黑', 'Simsun', '宋体', 'Arial', sans-serif;*/
+        font-family: 'microsoft yahei', 'Hiragino Sans GB', 'Pingfang SC', sans-serif;
+    }
+
+    img {
+        border: 0;
+    }
+
+    a {
+        color: #fff;
+        text-decoration: none;
+        outline: none;
+    }
+
+    ol,
+    ul,
+    li {
+        list-style: none;
+    }
+
+    .head-nav {
+        width: 100%;
+        height: 50px;
+        background: #ff9c01;
+    }
+
+    .head-nav-con {
+        width: 100%;
+        height: 50px;
+        margin: auto;
+    }
+
+    .head-nav-con ul li {
+        width: 170px;
+        float: left;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .head-nav-con ul li:hover {
+        background: #f60;
+    }
+
+    .head-nav-con ul a {
+        display: block;
+        text-decoration: none;
+        text-align: center;
+        line-height: 50px;
+        color: white;
+    }
+
+    .head-nav-con .drop-down {
+        position: relative;
+    }
+
+    .head-nav-con .drop-down-content {
+        padding: 0;
+        display: none;
+        position: absolute;
+        z-index: 1;
+        background: #ff9c01;
+    }
+
+    .head-nav-con .drop-down-content li:hover > a {
+        background-color: #f60;
+    }
+
+    .head-nav-con .drop-down:hover .drop-down-content {
+        display: block;
+    }
+
+    .head-nav-con .drop-down-2 {
+        position: relative;
+    }
+
+    .head-nav-con .drop-down-content-2 {
+        padding: 0;
+        display: none;
+        position: absolute;
+        z-index: 1;
+        background-color: #f60;
+        right: -170px;
+        top: 0;
+    }
+
+    .head-nav-con .drop-down-content-2 > li {
+        float: none;
+        background-color: #ff9c01;
+    }
+
+    .head-nav-con .drop-down-content-2 li:hover a {
+        background-color: #f60;
+    }
+
+    .head-nav-con .drop-down-2:hover .drop-down-content-2 {
+        display: block;
+    }
+</style>
+</html>

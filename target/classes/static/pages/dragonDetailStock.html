@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="../css/theme-default-easytable.css"/>
+    <link rel="stylesheet" href="../css/my.css"/>
+    <script src="../js/config.js"></script>
+    <script src="../js/Sortable.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/axios.min.js"></script>
+</head>
+<body>
+<div id="app" style="font-size: 12px;">
+    <div class="ve-table">
+        <div class="ve-table-container ve-table-border-around" id="vDiv" style="max-height: 900px; ">
+            <table class="ve-table-content ve-table-border-x ve-table-border-y" id="vTable">
+                <thead class="ve-table-fixed-header ve-table-header">
+                <tr class="ve-table-header-tr">
+                    <th class="ve-table-header-th" style="width: 100px;">
+                        <div>日期</div>
+                    </th>
+                    <th class="ve-table-header-th" style="width: 140px;">个股</th>
+                    <th class="ve-table-header-th" style="width: 190px;">行情</th>
+                    <th class="ve-table-header-th" style="width: 250px;">游资买入</th>
+                    <th class="ve-table-header-th" style="width: 220px;">资金流向</th>
+                    <th class="ve-table-header-th" style="width: 160px;">龙虎榜</th>
+                    <th class="ve-table-header-th" style="width: 300px;">上榜原因</th>
+                </tr>
+                </thead>
+                <tbody id="sort" class="ve-table-body ve-table-stripe ve-table-row-hover ve-table-row-highlight">
+                <tr style="height: 0px;"></tr>
+                <tr class="ve-table-body-tr" style="width: 70px" v-for="col in tableData">
+                    <td class="ve-table-body-td" style="text-align: center;">
+                        <a href="https://data.eastmoney.com/stock/tradedetail.html" target="_blank" style="color: #494949">
+                            {{col.tradeDate}}
+                        </a>
+                    </td>
+                    <td class="ve-table-body-td" :class="col.stockCode" @mouseenter="isHover(col.stockCode)" @mouseleave="isLeave(col.stockCode)">
+                        <div class="td-flex">
+                            <a :href="'https://data.eastmoney.com/stockdata/'+col.stockCode+'.html'" target="_blank" style="color: #494949">
+                                <span class="center" style="width: 65%; font-size: 20px; ">{{col.stockName}}</span>
+                            </a>
+
+                            <span class="center" style="width: 35%">{{col.freeMarketCap}}</span>
+                        </div>
+                        <div class="td-flex">
+                            <span class="center" style="width: 50%; font-size: 15px;" :style="col.changePercent.startsWith('-') ? 'color: green' : 'color: red'">{{col.close}}</span>
+                            <span class="center" style="width: 50%; font-size: 15px;" :style="col.changePercent.startsWith('-') ? 'color: green' : 'color: red'">{{col.changePercent}}</span>
+                        </div>
+                    </td>
+                    <td class="ve-table-body-td">
+                        <div class="td-flex">
+                            <span class="left" style="width: 45%">换手: {{col.turnover}}</span>
+                            <span class="left" style="width: 55%">成交额: {{col.amount}}</span>
+                        </div>
+                        <div class="td-flex">
+                            <span class="left" style="width: 45%">量比: {{col.volumeRatio}}</span>
+                            <span class="left" style="width: 55%">成交量: {{col.volume}}</span>
+                        </div>
+                        <div class="td-flex">
+                            <span class="left" style="width: 45%">市净: {{col.pb}}</span>
+                            <span class="left" style="width: 55%">市盈(动): {{col.pef}}</span>
+                        </div>
+                    </td>
+                    <td style="vertical-align: top;padding: 3px !important;" >
+                        <ul style="width: 100%; margin-bottom: 4px; padding: 2px; border: 0.4px solid #fef6f5;">
+                            <!-- :style="c.changePercent.startsWith('-') ? 'background: linear-gradient(#edf9f0, #fff);' : 'background: linear-gradient(#fef6f5, #fff);'"-->
+                            <li>
+                                <div class="td-flex" style="font-size: 11px; " v-for="(p, index) in col.partners"
+                                     :style="p.partnerBuyAmount.startsWith('-')
+                                            ? 'background: linear-gradient(to right, #abf0ab, #f1f1c2); border-radius: 1px; box-shadow: rgba(0.2, 0.2, 0.2, 0.2) 0px 3px 6px;'
+                                            : 'background: linear-gradient(to right, #f2b8b8, #f1f1c2); border-radius: 1px; box-shadow: rgba(0.2, 0.2, 0.2, 0.2) 0px 3px 6px;'">
+                                    <span class="left" style="width: 57px;" :style="p.partnerNetBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.partnerName}}</span>
+                                    <span class="right" style="width: 45px; color: red">{{p.partnerBuyAmount}}</span>
+                                    <span class="right" style="width: 45px; color: green">{{p.partnerSellAmount}}</span>
+                                    <span class="right" style="width: 45px;" :style="p.partnerNetBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.partnerNetBuyAmount}}</span>
+                                    <span class="right" style="width: 42px;" :style="p.partnerNetBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{p.partnerNetBuyRatio}}</span>
+                                </div>
+
+                                <!-- <div class="td-flex" style="display: inline-table;">
+                                     <span class="right" style="font-size: 10px;display: inline-block;color: red; border: 0.2px solid #f00; border-radius: 1px;box-shadow: 0 3px 6px rgba(0,0,0,0.2);">
+                                         中山东路
+                                     </span>
+                                 </div>-->
+                            </li>
+                        </ul>
+                    </td>
+                    <td class="ve-table-body-td">
+                        <a :href="'https://data.eastmoney.com/zjlx/'+col.stockCode+'.html'" target="_blank" style="color: #494949">
+                            <div class="td-flex">
+                                <span class="left" style="width: 50%">主力流入: <span style="color: red">{{col.mainIn}}</span></span>
+                                <span class="left" style="width: 50%">散户流入: <span style="color: red">{{col.retailIn}}</span></span>
+                            </div>
+                            <div class="td-flex">
+                                <span class="left" style="width: 50%">主力流出: <span style="color: green">{{col.mainOut}}</span></span>
+                                <span class="left" style="width: 50%">散户流出: <span style="color: green">{{col.retailOut}}</span></span>
+                            </div>
+                            <div class="td-flex">
+                                <span class="left" style="width: 50%">主力净额: <span :style="col.mainNetIn.startsWith('-') ? 'color: green' : 'color: red'">{{col.mainNetIn}}</span></span>
+                                <span class="left" style="width: 50%">散户净额: <span :style="col.retailNetIn.startsWith('-') ? 'color: green' : 'color: red'">{{col.retailNetIn}}</span></span>
+                            </div>
+                        </a>
+                    </td>
+                    <td class="ve-table-body-td">
+                        <a :href="'https://data.eastmoney.com/stock/lhb,'+col.tradeDate+','+col.stockCode+'.html'" target="_blank" style="color: #494949">
+                            <div class="td-flex">
+                                <span class="left" style="width: 60%">买入: <span style="color: red">{{col.buyAmount}}</span></span>
+                                <span class="left" style="width: 40%"><span style="color: red">{{col.buyAmountRatio}}</span></span>
+                            </div>
+                            <div class="td-flex">
+                                <span class="left" style="width: 60%">卖出: <span style="color: green">{{col.sellAmount}}</span></span>
+                                <span class="left" style="width: 40%"><span style="color: green">{{col.sellAmountRatio}}</span></span>
+                            </div>
+                            <div class="td-flex">
+                                <span class="left" style="width: 60%">净额: <span :style="col.netBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{col.netBuyAmount}}</span></span>
+                                <span class="left" style="width: 40%"><span :style="col.netBuyAmount.startsWith('-') ? 'color: green' : 'color: red'">{{col.netBuyAmountRatio}}</span></span>
+                            </div>
+                            <!-- <div class="td-flex">
+                                 <span class="left" style="width: 60%">成交额: {{col.dealAmount}}</span>
+                                 <span class="left" style="width: 40%">{{col.dealAmountRatio}}</span>
+                             </div>-->
+                        </a>
+                    </td>
+                    <td class="ve-table-body-td">{{col.explains}}<br>{{col.explanation}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlParams.entries());
+    console.log('urlParams:' + urlParams);
+    console.log('params:' + params);
+
+    // 异步请求函数必须要写在外面，然后在vue里面调用
+    function asyncLoadDate() {
+        axios.get(url + 'dragon/detail/stock/' + params.stockCode).then(function (response) {
+            if (response.status === 200) {
+                vm.fillData(response);
+            }
+        }).catch(function (error) {
+            alert("系统异常");
+        });
+    }
+
+    var vm = new Vue({
+        el: "#app",
+        mounted: function () {
+            asyncLoadDate();
+        },
+        methods: {
+            fillData: function (response) {
+                let json = response.data;
+                this.tableData = json.data;
+                // console.log(JSON.stringify(this.tableData))
+            },
+            isHover: function (stockCode) {
+                document.getElementById('vTable').querySelectorAll('.' + stockCode).forEach(function (el) {
+                    el.style.backgroundColor = 'yellow';
+                });
+            },
+            isLeave: function (stockCode) {
+                document.getElementById('vTable').querySelectorAll('.' + stockCode).forEach(function (el) {
+                    el.style.backgroundColor = ''; // 或者设置回默认颜色或其他颜色
+                });
+            },
+            //弹出隐藏层
+            getJsonValue: function (json) {
+                console.log(json)
+            },
+            showPartnerList: function () {
+                MyDiv.style.width = '1400px';
+                MyDiv.style.height = '725px';
+                MyDiv.style.display = 'block';
+                fade.style.display = 'block';
+                MyDiv.innerHTML = '<object type="text/html" data="partner.html" width="100%" height="99%"></object>';
+            },
+        },
+        data: function () {
+            return {
+                isDragging: true,
+                dates: [],
+                tableData: []
+            };
+        },
+    });
+</script>
+
+</html>

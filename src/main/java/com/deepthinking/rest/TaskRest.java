@@ -38,6 +38,8 @@ public class TaskRest {
 
     private final StockKlineMinuteService stockKlineMinuteService;
 
+    private final StockTechMinuteService stockTechMinuteService;
+
     private final TradeCalendarService tradeCalendarService;
 
     private final DragonStockService dragonStockService;
@@ -133,6 +135,14 @@ public class TaskRest {
         return Result.success();
     }
 
+
+    /**
+     * 获取股票分时行情、资金流向及计算指标
+     */
+    @GetMapping("stock/trends/{code}")
+    public Result<Void> getStockTrends(@PathVariable String code) {
+        return stockTechMinuteService.syncStockTrendsMinute(code);
+    }
 
     /**
      * 获取股票实时交易行情 资金流向

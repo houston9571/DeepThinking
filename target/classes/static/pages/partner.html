@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="../css/theme-default-easytable.css"/>
+    <link rel="stylesheet" href="../css/my.css"/>
+    <script src="../js/config.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/axios.min.js"></script>
+</head>
+<body style="overflow-y:hidden;">
+<div id="partner" style="font-size: 12px;">
+    <div style="white-space: nowrap;">
+        <div style="padding-left: 18px;font-size: small;">
+            1. 多知名游资协同买入--强题材信号。数据验证：有68%的个股在启动阶段，存在2家以上知名游资协同买入的情况，题材达成共识，后续上涨概率极高；
+        </div>
+        <div style="padding-left: 18px;font-size: small;">
+            2. 游资与机构共振--中期行情信号。既有知名游资，又有多家机构专用席位，说明短线资金和中长期资金达成共识，净买入占成交15%，后续2日上涨概率超60%；
+        </div>
+        <div style="padding-left: 18px;font-size: small;">
+            3. 前期游资离场+散户接盘--风险信号。前期主导行情的知名游资席位出现在卖方前五，而买方全是拉萨系等散户席位、国信浙江互联网分公司，往往代表题材进入“击鼓传花”的后期；
+        </div>
+
+    </div>
+    <div class="ve-table">
+        <div class="ve-table-container ve-table-border-around" style="height: 650px;">
+            <table class="ve-table-content ve-table-border-x ve-table-border-y" style="width: 1000px;">
+                <thead class="ve-table-fixed-header ve-table-header">
+                <tr class="ve-table-header-tr">
+                    <th class="ve-table-header-th" style="width: 30px;">序号</th>
+                    <th class="ve-table-header-th" style="width: 140px;">游资</th>
+                    <th class="ve-table-header-th" style="width: 40px;">一年上榜</th>
+                    <th class="ve-table-header-th" style="width: 250px;">风格</th>
+                    <th class="ve-table-header-th" style="width: 250px;">席位</th>
+                </tr>
+                </thead>
+                <tbody class="ve-table-body ve-table-stripe ve-table-row-hover ve-table-row-highlight">
+                <tr class="ve-table-body-tr" v-for="(col,index) in tableData">
+                    <td class="ve-table-body-td" style="text-align: center;">{{index+1}}</td>
+                    <td class="ve-table-body-td">
+                        <div class="td-flex">
+                            <span class="center" style="font-size: 20px; width: 100%">{{col.partnerName}}
+                            </span>
+                        </div>
+                        <div class="td-flex">
+                            <span class="center" style="font-size: 12px; color: #494949; width: 100%">{{col.level}} {{col.fundSize}}</span>
+                        </div>
+                    </td>
+                    <td class="ve-table-body-td">
+                        <div class="td-flex" v-if="col.conceptCount > 0">
+                            <span class="center" style=" width: 100%">{{col.conceptCount}}次</span>
+                        </div>
+                        <div class="td-flex" v-if="col.conceptCount > 0">
+                            <span class="center" style=" width: 100%">{{col.tradeAmount}}亿</span>
+                        </div>
+                    </td>
+                    <td class="ve-table-body-td">
+                        <div class="td-flex">
+                            <span class="left" style=" width: 100%">{{col.style}}</span>
+                        </div>
+                    </td>
+                    <td class="ve-table-body-td">
+                        <div class="td-flex">
+                            <a href="#" class="em-totop" style="font-size: 10px;" @click="showPartnerDept(col.partnerCode, col.partnerName)"> 新增</a>
+                        </div>
+                        <div class="td-flex" v-for="(c, index) in col.deptArray">
+                            <span class="left">{{c.deptName}}
+                                <a v-if="c.deptName != null" href="#" class="em-totop" style="font-size: 10px;" @click="deleteDept(col.partnerCode, c.deptCode)"> 删除</a>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!--弹出层时背景层DIV-->
+<div id="fade" class="black_overlay" onclick="CloseDiv()"></div>
+<div id="MyDiv" class="white_content_small" style="overflow-x:hidden; overflow-y:hidden;"></div>
+</body>
+
+<script>
+    var fade = document.getElementById('fade');
+    var MyDiv = document.getElementById('MyDiv');
+    //关闭弹出层
+    fade.onclick = function () {
+        MyDiv.style.display = 'none';
+        fade.style.display = 'none';
+    };
+
+    // 异步请求函数必须要写在外面，然后在vue里面调用
+    function asyncLoadDate() {
+        axios.get(url + 'org/partner')
+            .then(function (response) {
+                if (response.status === 200) {
+                    vm.fillData(response);
+                }
+            })
+            .catch(function (error) {
+                alert("系统异常");
+            });
+    }
+
+    var vm = new Vue({
+        el: "#partner",
+        mounted: function () {
+            asyncLoadDate();
+        },
+        methods: {
+            fillData: function (response) {
+                let json = response.data;
+                this.tableData = json.data;
+                // console.log(this.tableData);
+            },
+            showPartnerDept: function (partnerCode, partnerName) {
+                MyDiv.style.width = '600px';
+                MyDiv.style.height = '400px';
+                MyDiv.style.display = 'block';
+                fade.style.display = 'block';
+                MyDiv.innerHTML = '<object type="text/html" data="addDept.html?partnerCode=' + partnerCode + '&partnerName=' + partnerName + '" width="100%" height="99%"></object>';
+            },
+            deleteDept: function (partnerCode, deptCode) {
+                if (confirm('确定删除席位吗？')) {
+                    axios.delete(url + 'org/partner/dept/' + partnerCode + "/" + deptCode).then(function (response) {
+                        if (response.status === 200) {
+                            alert('操作成功', function () {
+                                this.reload();
+                            });
+                        }
+                    }).catch(function (error) {
+                        alert("删除席位系统异常");
+                    });
+                    console.log('确认操作 ' + partnerCode + deptCode);
+                } else {
+                    console.log('取消操作');
+                }
+            }
+        },
+        data: function () {
+            return {
+                tableData: []
+            };
+        },
+    });
+</script>
+
+</html>

@@ -41,6 +41,8 @@ public enum ErrorCode {
 
     DATA_UPDATED(1012, "数据已经更新 %s:%s", "Date was updated %s:%s"),
 
+    DATA_UNPAIR(1013, "数据不匹配 %s -> %s", "Date was unpair %s -> %s"),
+
     NETWORK_FAILED(1014, "网络请求失败。url=%s body=%s", ""),
     ;
 

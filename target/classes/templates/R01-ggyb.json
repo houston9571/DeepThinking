@@ -1,0 +1,128 @@
+{
+  "description": "个股研报",
+  "responseFormat": "JSON",
+  "requestMethod": "GET",
+  "requestBody": "",
+  "executeJavaScript": false,
+  // 最大每页100条
+  // http://reportapi.eastmoney.com/report/list?cb=datatable4579313&industryCode=727&pageSize=50&industry=*&rating=*&ratingChange=*&beginTime=2019-02-09&endTime=2021-02-09&pageNo=4&fields=&qType=0&orgCode=&code=*&rcode=&p=4&pageNum=4&_=1612871029693
+  // http://reportapi.eastmoney.com/report/list?pageSize=50&&beginTime={beginTime}&endTime={endTime}&pageNo={pageNo}&fields=&qType=0&orgCode=&rcode=&p=4&pageNum={pageNo}&_={roundNum}
+  "url": "http://reportapi.eastmoney.com/report/list?pageSize=50&beginTime={beginTime}&endTime={endTime}&pageNo={pageNo}&fields=&qType=0&orgCode=&rcode=&p=4&pageNum={pageNo}&_={roundNum}",
+  "factors": [
+    {
+      "modelName": "reportStockPage",
+      "xPath": "",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "ONE",
+      "subsets": [
+        {
+          "description": "总页数",
+          "property": "totalPage",
+          "xPath": "$.TotalPage"
+        },
+        {
+          "description": "总条数",
+          "property": "hits",
+          "xPath": "$.hits"
+        }
+      ]
+    },
+    {
+      "modelName": "reportStockData",
+      "xPath": "$.data",
+      // ONE | MANY 必须xPath查找出的结果是多条才能用
+      "results": "MANY",
+      "subsets": [
+        {
+          "description": "发布日期",
+          "property": "publishDate",
+          "xPath": "$.publishDate",
+          "xPattern": [
+            "(\\d{4}-\\d{1,2}-\\d{1,2})"
+          ]
+        },
+        {
+          "description": "股票代码",
+          "property": "code",
+          "xPath": "$.stockCode"
+        },
+        {
+          "description": "报告名称",
+          "property": "title",
+          "xPath": "$.title"
+        },
+        {
+          // http://data.eastmoney.com/report/zw_stock.jshtml?infocode=AP202102091460339209
+          "description": "报告详情",
+          "property": "infoCode",
+          "xPath": "$.infoCode"
+        },
+        {
+          "description": "东财评级值",
+          "property": "emRatingValue",
+          "xPath": "$.emRatingValue"
+        },
+        {
+          "description": "东财评级",
+          "property": "emRatingName",
+          "xPath": "$.emRatingName"
+        },
+        {
+          "description": "机构代码",
+          "property": "orgCode",
+          "xPath": "$.orgCode"
+        },
+        {
+          "description": "机构",
+          "property": "orgName",
+          "xPath": "$.orgSName"
+        },
+        {
+          "description": "近一月个股研报数",
+          "property": "count",
+          "xPath": "$.count"
+        },
+        {
+          "description": "去年预测盈利收益",
+          "property": "lastYearEps",
+          "xPath": "$.predictLastYearEps"
+        },
+        {
+          "description": "去年预测盈利市盈率",
+          "property": "lastYearPe",
+          "xPath": "$.predictLastYearPe"
+        },
+        {
+          "description": "今年预测盈利收益",
+          "property": "thisYearEps",
+          "xPath": "$.predictThisYearEps"
+        },
+        {
+          "description": "今年预测盈利市盈率",
+          "property": "thisYearPe",
+          "xPath": "$.predictThisYearPe"
+        },
+        {
+          "description": "明年预测盈利收益",
+          "property": "nextYearEps",
+          "xPath": "$.predictNextYearEps"
+        },
+        {
+          "description": "明年预测盈利市盈率",
+          "property": "nextYearPe",
+          "xPath": "$.predictNextYearPe"
+        },
+        {
+          "description": "行业代码",
+          "property": "hycode",
+          "xPath": "$.indvInduCode"
+        },
+        {
+          "description": "行业",
+          "property": "hy",
+          "xPath": "$.indvInduName"
+        }
+      ]
+    }
+  ]
+}

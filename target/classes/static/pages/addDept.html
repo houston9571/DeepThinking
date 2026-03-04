@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="../css/theme-default-easytable.css"/>
+    <link rel="stylesheet" href="../css/my.css"/>
+    <script src="../js/config.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/axios.min.js"></script>
+    <style>
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            padding-right: 40px;
+        }
+    </style>
+</head>
+<body style="overflow-y:hidden; font-size: 12px">
+<div id="app">
+    <div style="color: #494949">新增游资席位</div>
+    <div class="flex-container">
+        <div style="width: 20%">
+            <div class="right" style="font-size: 14px; padding-right: 20px;height: 40px;">游资:</div>
+            <div class="right" style="font-size: 14px; padding-right: 20px;height: 40px;">席位:</div>
+        </div>
+        <div style="width: 80%">
+            <div class="left" style="font-size: 14px; height: 40px;">{{partnerName}}</div>
+            <div class="left" style="font-size: 14px;">
+                <div>
+                    <input type="text" v-model="searchQuery" placeholder="输入搜索..." style="height: 25px;"/>
+                    <div v-for="option in filterOptions()" :key="option.partnerCode" @click="selectDept(option.partnerCode)">
+                        {{ option.partnerName }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlParams.entries());
+    console.log(params);
+
+    // 异步请求函数必须要写在外面，然后在vue里面调用
+    function asyncLoadDate() {
+        axios.get(url + 'org/partner/dept/nomatch/' + params.partnerCode)
+            .then(function (response) {
+                if (response.status === 200) {
+                    vm.fillData(response);
+                }
+            })
+            .catch(function (error) {
+                alert("系统异常");
+            });
+    }
+
+    var vm = new Vue({
+        el: "#app",
+        mounted: function () {
+            asyncLoadDate();
+            this.partnerCode = params.partnerCode;
+            this.partnerName = params.partnerName;
+        },
+        methods: {
+            fillData: function (response) {
+                let json = response.data;
+                this.tableData = json.data;
+            },
+            selectDept(partnerCode) {
+                axios.put(url + 'org/partner/dept/' + this.partnerCode + '/' + partnerCode, {}).then(function (response) {
+                    if (response.status === 200) {
+                        alert('操作成功', function () {
+                            window.close();
+                        });
+                    }
+                }).catch(function (error) {
+                    alert("增加席位系统异常");
+                });
+            },
+            filterOptions() {
+                return this.tableData.filter(option => {
+                    return option.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                });
+            },
+            selectDeptsss(code) {
+                this.deptCode = code;
+                this.searchQuery = '';
+            },
+            closePage() {
+                this.$router.go(-1);
+            },
+        },
+        data: function () {
+            return {
+                deptCode: '',
+                partnerCode: '',
+                partnerName: '',
+                searchQuery: '',
+                tableData: []
+            };
+        },
+    });
+</script>
+
+</html>
