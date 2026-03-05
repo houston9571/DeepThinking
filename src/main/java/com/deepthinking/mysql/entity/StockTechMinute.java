@@ -62,14 +62,13 @@ public class StockTechMinute extends BaseEntity {
     private BigDecimal kdjK;
     private BigDecimal kdjD;
     private BigDecimal kdjJ;
-    private Short kdjGolden;
+    private Integer kdjGolden;
 
     private BigDecimal wr6;
 
     private BigDecimal bollMid;
     private BigDecimal bollUpper;
     private BigDecimal bollLower;
-    private Short bollExpandStatus;
 
     private BigDecimal vmacdDif;
     private BigDecimal vmacdDea;

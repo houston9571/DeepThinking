@@ -53,7 +53,7 @@ public class StockTechMinuteServiceImpl extends MybatisBaseServiceImpl<StockTech
         }
         JSONArray trends = data.getJSONArray("trends");
 
-        json = eastMoneyStockApi.getFundsFlowLines(stockCode, MarketType.getMarketCode(stockCode), KLINE_1MIN, 15);
+        json = eastMoneyStockApi.getFundsFlowLines(stockCode, MarketType.getMarketCode(stockCode), KLINE_1MIN, 20);
         data = json.getJSONObject(LABEL_DATA);
         if (ObjectUtil.isEmpty(data) || !data.containsKey("klines")) {
             return Result.fail(NOT_GET_PAGE_ERROR, "getFundsFlowLines");
@@ -96,10 +96,59 @@ public class StockTechMinuteServiceImpl extends MybatisBaseServiceImpl<StockTech
     }
 
 
+    public Result<Void> syncStockTrendsMinuteAll(String stockCode) {
+        JSONObject json = eastMoneyStockApi.getStockTrends(stockCode, MarketType.getMarketCode(stockCode), SystemClock.now());
+        JSONObject data = json.getJSONObject(LABEL_DATA);
+        if (ObjectUtil.isEmpty(data) || !data.containsKey("trends")) {
+            return Result.fail(NOT_GET_PAGE_ERROR, "getStockTrends");
+        }
+        JSONArray trends = data.getJSONArray("trends");
+
+        json = eastMoneyStockApi.getFundsFlowLines(stockCode, MarketType.getMarketCode(stockCode), KLINE_1MIN, 240);
+        data = json.getJSONObject(LABEL_DATA);
+        if (ObjectUtil.isEmpty(data) || !data.containsKey("klines")) {
+            return Result.fail(NOT_GET_PAGE_ERROR, "getFundsFlowLines");
+        }
+        JSONArray lines = data.getJSONArray("klines");
+        String stockName = data.getString("name");
+
+        for (int i = 16; i < trends.size()-20; i++) {      // 竞价集合的不要
+            List<StockTechMinute> techMinuteList = Lists.newArrayList();
+            int end = i + 20;
+            for (int j = i; j < end; j++) {
+                StockTechMinute tech = StockTechMinute.builder().stockCode(stockCode).stockName(stockName).build();
+                String[] trend = trends.getString(j).split(COMMA);
+                if (j == (i + 19)) {
+                    String[] lastLine = lines.getString(i).split(COMMA);
+                    tech.setMainNetIn(lastLine[1]);
+                    tech.setSmallNetIn(lastLine[2]);
+                    tech.setMediumNetIn(lastLine[3]);
+                    tech.setLargeNetIn(lastLine[4]);
+                    tech.setSuperLargeNetIn(lastLine[5]);
+                }
+                String[] t = trend[0].split("\\s+");
+                tech.setTradeDate(DateUtils.parseLocalDate(t[0], DateFormatEnum.DATE));
+                tech.setTradeTime(DateUtils.parseLocalTime(t[1] + ":00", DateFormatEnum.TIME));
+                tech.setOpen(new BigDecimal(trend[1]));
+                tech.setClose(new BigDecimal(trend[2]));
+                tech.setHigh(new BigDecimal(trend[3]));
+                tech.setLow(new BigDecimal(trend[4]));      // 这四个价格需要再核对字段
+                tech.setVolume(Double.valueOf(trend[5]).longValue());     // 分时成交量
+                tech.setAmount(Double.valueOf(trend[6]).longValue());     // 分时成交额
+                tech.setTotalVolume(Double.valueOf(trend[10]).longValue());     // 总成交量
+                tech.setTotalAmount(Double.valueOf(trend[11]).longValue());     // 总成交额
+                techMinuteList.add(tech);
+            }
+            StockTechMinute tech = Ta4jMinuteIndicatorCalculator.calcMinuteIndicator(techMinuteList);
+            saveOrUpdate(tech, new String[]{"stock_code", "trade_date", "trade_time"});
+        }
+        return Result.success();
+    }
+
 
     public void calculateMinuteIndicatorAndSave(List<StockKlineMinute> prev10MinuteList) {
         // 至少需要10分钟数据（适配分时MA10/BOLL10）
-        if (prev10MinuteList.size()  < 10) {
+        if (prev10MinuteList.size() < 10) {
             log.warn("分时数据不足不计算，必须满足10条");
             return;
         }
@@ -134,7 +183,7 @@ public class StockTechMinuteServiceImpl extends MybatisBaseServiceImpl<StockTech
 
         // 2. 组装最新分时指标
         List<StockTechMinute> techList = Lists.newArrayList();
-        for (int i = last-1; i < prev10MinuteList.size(); i++) {
+        for (int i = last - 1; i < prev10MinuteList.size(); i++) {
             StockKlineMinute bar = prev10MinuteList.get(i);
             StockTechMinute tech = new StockTechMinute();
             tech.setStockCode(bar.getStockCode());

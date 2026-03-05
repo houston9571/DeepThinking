@@ -141,7 +141,7 @@ public class TaskRest {
      */
     @GetMapping("stock/trends/{code}")
     public Result<Void> getStockTrends(@PathVariable String code) {
-        return stockTechMinuteService.syncStockTrendsMinute(code);
+        return stockTechMinuteService.syncStockTrendsMinuteAll(code);
     }
 
     /**

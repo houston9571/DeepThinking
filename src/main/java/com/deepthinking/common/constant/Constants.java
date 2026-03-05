@@ -24,10 +24,6 @@ public interface Constants {
     short DISABLED = 0;
     short DELETED = -1;
 
-    short GOLDEN_CROSS_RED = 2;
-    short GOLDEN_CROSS = 1;
-    short DEATH_CROSS = -1;
-    short DEATH_CROSS_GREEN = -2;
 
     short EXPAND = 1;
     short SHRINK = -1;

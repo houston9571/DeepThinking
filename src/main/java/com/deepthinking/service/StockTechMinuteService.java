@@ -12,6 +12,8 @@ public interface StockTechMinuteService extends MybatisBaseService<StockTechMinu
 
     Result<Void> syncStockTrendsMinute(String stockCode);
 
+    Result<Void> syncStockTrendsMinuteAll(String stockCode);
+
     @Deprecated
     void calculateMinuteIndicatorAndSave(List<StockKlineMinute> last10);
 
