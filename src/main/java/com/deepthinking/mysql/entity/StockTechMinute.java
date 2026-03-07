@@ -3,6 +3,10 @@ package com.deepthinking.mysql.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.deepthinking.strategy.DtBOLLIndicator;
+import com.deepthinking.strategy.DtKDJIndicator;
+import com.deepthinking.strategy.DtMACDIndicator;
+import com.deepthinking.strategy.DtOBVMAIndicator;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -53,7 +57,7 @@ public class StockTechMinute extends BaseEntity {
     private BigDecimal macdDif;
     private BigDecimal macdDea;
     private BigDecimal macdBar;
-    private Short macdGolden;
+    private DtMACDIndicator.CrossStatus macdStatus;
 
     //    private BigDecimal rsi3;
     private BigDecimal rsi6;
@@ -62,13 +66,15 @@ public class StockTechMinute extends BaseEntity {
     private BigDecimal kdjK;
     private BigDecimal kdjD;
     private BigDecimal kdjJ;
-    private Integer kdjGolden;
+    private DtKDJIndicator.CrossStatus kdjStatus;
 
     private BigDecimal wr6;
 
     private BigDecimal bollMid;
     private BigDecimal bollUpper;
     private BigDecimal bollLower;
+    private DtBOLLIndicator.MouthStatus bollMouthStatus;
+    private DtBOLLIndicator.MidTrend bollMidTrend;
 
     private BigDecimal vmacdDif;
     private BigDecimal vmacdDea;
@@ -77,7 +83,7 @@ public class StockTechMinute extends BaseEntity {
 
     private Long obv;
     private Long obvMa5;
-    private Short obvGolden;
+    private DtOBVMAIndicator.CrossStatus obvGolden;
 
     // 背离类型：0=无背离,1=MACD顶背离,2=MACD底背离
     private Short divergenceType;

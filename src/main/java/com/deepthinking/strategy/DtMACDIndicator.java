@@ -2,7 +2,6 @@ package com.deepthinking.strategy;
 
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.indicators.CachedIndicator;
-import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.num.Num;
 
 import java.util.ArrayList;
@@ -15,196 +14,159 @@ import static com.deepthinking.strategy.StrategyUtils.*;
  * 100%对齐东财分时/日线MACD数值，适配1分钟超短线场景
  */
 public class DtMACDIndicator extends CachedIndicator<Num> {
-    /**
-     * 【最终修正版】严格对齐东方财富 APP 的 MACD
-     *
-     * 核心算法确认（基于国内软件通用标准）：
-     * 1. EMA 初始值：EMA[0] = Close[0] (第一天的收盘价)
-     * 2. 递推公式：EMA[i] = Close[i] * (2/(N+1)) + EMA[i-1] * (1 - 2/(N+1))
-     * 3. DIF = EMA(12) - EMA(26)
-     * 4. DEA = EMA(DIF, 9) [同样采用首日锚定]
-     * 5. MACD 柱 = (DIF - DEA) * 2
-     *
-     * ⚠️ 重要前提：
-     * 必须使用【前复权】收盘价数据！
-     * 如果数据源是不复权的，结果将与东财 APP 完全不同。
-     */
 
-        private final ClosePriceIndicator closePrice;
-        private final int fastPeriod;   // 12
-        private final int slowPeriod;   // 26
-        private final int signalPeriod; // 9
+    private List<Num> difValues;
+    private List<Num> deaValues;
+    private List<Num> histogramValues;
 
-        private List<Num> difValues;
-        private List<Num> deaValues;
-        private List<Num> histogramValues;
+    public DtMACDIndicator(BarSeries series, int fast, int slow, int signal) {
+        super(series);
 
-        public DtMACDIndicator(BarSeries series) {
-            this(series, 5, 13, 2);
-        }
+        // 1. 计算快慢 EMA (严格东财逻辑)
+        DtEMAIndicator emaFast = new DtEMAIndicator(series, fast);
+        DtEMAIndicator emaSlow = new DtEMAIndicator(series, slow);
 
-        public DtMACDIndicator(BarSeries series, int fast, int slow, int signal) {
-            super(series);
+        // 2. 构建 DIF 序列 (作为临时 TimeSeries 或直接列表处理)
+        // 这里为了复用 EastMoneyEMA，我们需要先生成 DIF 列表，再包装成一个临时的 Indicator
+        int count = series.getBarCount();
+        List<Num> difList = new ArrayList<>(count);
+        difValues = new ArrayList<>(count);
 
-            this.closePrice = new ClosePriceIndicator(series);
-            this.fastPeriod = fast;
-            this.slowPeriod = slow;
-            this.signalPeriod = signal;
-
-            preCalculate();
-        }
-
-        private void preCalculate() {
-            int barCount = getBarSeries().getBarCount();
-            difValues = new ArrayList<>(barCount);
-            deaValues = new ArrayList<>(barCount);
-            histogramValues = new ArrayList<>(barCount);
-
-            // 1. 计算 EMA(12) 和 EMA(26) -> 采用首日锚定法
-            Num[] emaFast = calculateEMASimpleAnchor(closePrice, fastPeriod, barCount);
-            Num[] emaSlow = calculateEMASimpleAnchor(closePrice, slowPeriod, barCount);
-
-            // 2. 计算 DIF
-            List<Num> difList = new ArrayList<>(barCount);
-            for (int i = 0; i < barCount; i++) {
-                if (emaFast[i] != null && emaSlow[i] != null) {
-                    difList.add(emaFast[i].minus(emaSlow[i]));
-                } else {
-                    difList.add(null);
-                }
-            }
-
-            // 3. 计算 DEA = EMA(DIF, 9) -> 同样采用首日锚定法
-            // 注意：DIF 序列前面可能有 null (因为 EMA26 还没算出来)，需要找到第一个非空值作为锚点
-            Num[] deaArray = calculateEMASimpleAnchorFromList(difList, signalPeriod, barCount);
-
-            // 4. 计算柱状图
-            for (int i = 0; i < barCount; i++) {
-                Num dif = difList.get(i);
-                Num dea = deaArray[i];
-
+        for (int i = 0; i < count; i++) {
+            Num fastVal = emaFast.getValue(i);
+            Num slowVal = emaSlow.getValue(i);
+            if (fastVal != null && slowVal != null) {
+                Num dif = fastVal.minus(slowVal);
+                difList.add(dif);
                 difValues.add(dif);
-                deaValues.add(dea);
-
-                if (dif != null && dea != null) {
-                    // MACD 柱 = (DIF - DEA) * 2
-                    Num bar = dif.minus(dea).multipliedBy(NUM_2);
-                    histogramValues.add(bar);
-                } else {
-                    histogramValues.add(null);
-                }
+            } else {
+                difList.add(null);
+                difValues.add(null);
             }
         }
 
-        /**
-         * 【核心算法】首日锚定 EMA
-         * 逻辑：
-         * EMA[0] = Close[0]
-         * EMA[i] = Close[i] * k + EMA[i-1] * (1-k)
-         *
-         * 这是国内软件在数据量充足时的实际表现。
-         */
-        private Num[] calculateEMASimpleAnchor(ClosePriceIndicator priceInd, int period, int count) {
-            Num[] result = new Num[count];
-            if (count == 0) return result;
+        // 3. 计算 DEA = EMA(DIF, signal)
+        // 注意：DIF 前面可能有 null (因为 SlowEMA 需要时间预热)，但 EastMoneyEMA 逻辑是 Close[0]=EMA[0]
+        // 对于 DIF 序列，我们需要找到第一个非空值作为 "Close[0]" 的等价物
+        deaValues = calculateEMAFromList(difList, signal);
 
-            Num k = numOf(2).dividedBy(numOf(period + 1));
-            Num oneMinusK = numOf(1).minus(k);
-
-            // 锚定：EMA[0] = Close[0]
-            Num currentEma = priceInd.getValue(0);
-            result[0] = currentEma;
-
-            // 递推
-            for (int i = 1; i < count; i++) {
-                Num price = priceInd.getValue(i);
-                currentEma = price.multipliedBy(k).plus(currentEma.multipliedBy(oneMinusK));
-                result[i] = currentEma;
+        // 4. 计算柱状图
+        histogramValues = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            Num dif = difValues.get(i);
+            Num dea = deaValues.get(i);
+            if (dif != null && dea != null) {
+                histogramValues.add(dif.minus(dea).multipliedBy(NUM_2));
+            } else {
+                histogramValues.add(null);
             }
-
-            return result;
         }
+    }
 
-        /**
-         * 【核心算法】List 序列的首日锚定 EMA (用于计算 DEA)
-         */
-        private Num[] calculateEMASimpleAnchorFromList(List<Num> data, int period, int count) {
-            Num[] result = new Num[count];
-            if (count == 0 || data.isEmpty()) return result;
+    // ... (getter 方法同上)
 
-            // 找到第一个非空值作为锚点
-            int anchorIndex = -1;
-            for (int i = 0; i < count; i++) {
-                if (data.get(i) != null) {
-                    anchorIndex = i;
-                    break;
-                }
-            }
+    @Override
+    protected Num calculate(int index) {
+        return histogramValues.get(index);
+    }
 
-            if (anchorIndex == -1) return result;
+    public Num getHistogram(int index) {
+        return histogramValues.get(index);
+    }
 
-            Num numPrototype = data.get(anchorIndex);
-            Num k = numOf(2).dividedBy(numOf(period + 1));
-            Num oneMinusK = numOf(1).minus(k);
+    public Num getDIF(int index) {
+        return difValues.get(index);
+    }
 
-            // 锚定：EMA[anchorIndex] = Data[anchorIndex]
-            Num currentEma = data.get(anchorIndex);
-            result[anchorIndex] = currentEma;
+    public Num getDEA(int index) {
+        return deaValues.get(index);
+    }
 
-            // 递推
-            for (int i = anchorIndex + 1; i < count; i++) {
-                Num val = data.get(i);
-                if (val == null) {
-                    // 理论上 DIF 一旦开始就不会中断，除非数据源缺失
-                    result[i] = null;
-                    continue;
-                }
-                currentEma = val.multipliedBy(k).plus(currentEma.multipliedBy(oneMinusK));
-                result[i] = currentEma;
-            }
 
-            return result;
+    public boolean isHighest(int index){
+        return isHighestNum(difValues, getDIF(index));
+    }
+
+    public boolean isLowest(int index){
+        return isLowestNum(difValues, getDIF(index));
+    }
+
+    public enum CrossStatus {
+        GOLDEN_CROSS_RED,
+        GOLDEN_CROSS,
+        DEATH_CROSS,
+        DEATH_CROSS_GREEN,
+        NONE
+    }
+
+
+    public CrossStatus getCrossStatus(int index){
+        if(getDIF(index).isGreaterThan(getDEA(index)) && getDIF(index-1).isLessThanOrEqual(getDEA(index-1)) ){
+            if(isRedExpand(index))
+                return CrossStatus.GOLDEN_CROSS_RED;
+            return CrossStatus.GOLDEN_CROSS;
+        }else if (getDIF(index).isLessThan(getDEA(index)) && getDIF(index-1).isGreaterThanOrEqual(getDEA(index-1)) ){
+            if(isGreenExpand(index))
+                return CrossStatus.DEATH_CROSS_GREEN;
+            return CrossStatus.DEATH_CROSS;
         }
+        return CrossStatus.NONE;
+    }
 
-        @Override
-        protected Num calculate(int index) {
-            return histogramValues.get(index);
-        }
+    // 红柱放大
+    public boolean isRedExpand(int index){
+        return getHistogram(index).isPositive() && getHistogram(index).isGreaterThan(getHistogram(index-1));
+    }
 
-        public Num getDIF(int index) {
-            return difValues.get(index);
-        }
+    // 绿柱放大
+    public boolean isGreenExpand(int index){
+        return getHistogram(index).isNegative() && getHistogram(index).isLessThan(getHistogram(index-1));
+    }
 
-        public Num getDEA(int index) {
-            return deaValues.get(index);
-        }
-
-        public Num getHistogram(int index) {
-            return histogramValues.get(index);
-        }
-
-        public boolean isGoldenCross(int index) {
-            if (index <= 0) return false;
-            Num prevDif = getDIF(index - 1);
-            Num prevDea = getDEA(index - 1);
-            Num currDif = getDIF(index);
-            Num currDea = getDEA(index);
-            if (prevDif == null || prevDea == null || currDif == null || currDea == null) return false;
-            return prevDif.isLessThan(prevDea) && currDif.isGreaterThan(currDea);
-        }
-
-        public boolean isDeathCross(int index) {
-            if (index <= 0) return false;
-            Num prevDif = getDIF(index - 1);
-            Num prevDea = getDEA(index - 1);
-            Num currDif = getDIF(index);
-            Num currDea = getDEA(index);
-            if (prevDif == null || prevDea == null || currDif == null || currDea == null) return false;
-            return prevDif.isGreaterThan(prevDea) && currDif.isLessThan(currDea);
-        }
 
     @Override
     public int getCountOfUnstableBars() {
         return 0;
     }
+
+
+    public List<Num> calculateEMAFromList(List<Num> inputData, int period) {
+        List<Num> result = new ArrayList<>(inputData.size());
+        Num alpha = NUM_2.dividedBy(numOf(period + 1));
+        Num oneMinusAlpha = NUM_1.minus(alpha);
+
+        // 寻找第一个非空值作为种子
+        int seedIndex = -1;
+        for (int i = 0; i < inputData.size(); i++) {
+            if (inputData.get(i) != null) {
+                seedIndex = i;
+                break;
+            }
+        }
+
+//        if (seedIndex == -1) return;
+
+        // 种子：EMA[seedIndex] = Data[seedIndex]
+        Num currentEma = inputData.get(seedIndex);
+
+        // 填充前面的 null
+        for (int i = 0; i < seedIndex; i++) {
+            result.add(null);
+        }
+
+        result.add(currentEma);
+
+        // 递推
+        for (int i = seedIndex + 1; i < inputData.size(); i++) {
+            Num val = inputData.get(i);
+            if (val == null) {
+                result.add(null);
+                continue;
+            }
+            currentEma = val.multipliedBy(alpha).plus(currentEma.multipliedBy(oneMinusAlpha));
+            result.add(currentEma);
+        }
+        return result;
+    }
+
 }

@@ -235,7 +235,7 @@ public class DtBOLLIndicator extends CachedIndicator<Num> {
     /**
      * 中轨趋势状态枚举
      */
-    public enum MidrailTrend {
+    public enum MidTrend {
         STRONG_UP,      // 陡峭上涨    趋势：强劲上涨 (中轨陡峭向上)
         WEAK_UP,        // 缓步上涨    趋势：温和上涨
         FLAT,           // 走平
@@ -244,37 +244,13 @@ public class DtBOLLIndicator extends CachedIndicator<Num> {
         UNKNOWN
     }
 
-
-    // ================= 辅助方法 =================
-
-    /**
-     * 综合策略信号示例：
-     * "开口上涨"：中轨向上倾斜 + 布林带开口
-     */
-    public boolean isBullishBreakout(int index) {
-        MouthStatus mouth = getMouthStatus(index);
-        MidrailTrend trend = getMidrailTrend(index);
-        return (mouth == MouthStatus.OPENING || mouth == MouthStatus.PARALLEL) &&
-                (trend == MidrailTrend.STRONG_UP || trend == MidrailTrend.WEAK_UP);
-    }
-
-    /**
-     * 综合策略信号示例：
-     * "收口盘整"：布林带收口 + 中轨走平或下倾
-     */
-    public boolean isConsolidation(int index) {
-        MouthStatus mouth = getMouthStatus(index);
-        MidrailTrend trend = getMidrailTrend(index);
-        return mouth == MouthStatus.SQUEEZING && (trend == MidrailTrend.FLAT || trend == MidrailTrend.WEAK_DOWN || trend == MidrailTrend.STRONG_DOWN);
-    }
-
     /**
      * 获取中轨的斜率数值
      * 公式：Slope = (MB[index] - MB[index - lookBack]) / lookBack
      * lookBack 默认为 5，表示看过去 5 根 K 线的平均斜率，以平滑噪音
      * 基于斜率百分比进行判断
      */
-    public MidrailTrend getMidrailTrend(int index) {
+    public MidTrend getMidTrend(int index) {
         int lookBack = 5;
         if (index < lookBack || getMid(index) == null || getMid(index - lookBack) == null) {
             return null;
@@ -288,17 +264,41 @@ public class DtBOLLIndicator extends CachedIndicator<Num> {
         }
         // 返回百分比数值 (例如 0.05 代表 5%)
         Num slopePercent = slope.dividedBy(currentMB).multipliedBy(NUM_100);
-        if (slopePercent == null) return MidrailTrend.UNKNOWN;
+        if (slopePercent == null) return MidTrend.UNKNOWN;
 
         double val = slopePercent.doubleValue();
         // 阈值可根据品种波动性调整，日线级别 0.5% ~ 1% 作为分界
-        if (val > 1.0) return MidrailTrend.STRONG_UP;
-        if (val > 0.1) return MidrailTrend.WEAK_UP;
-        if (val < -1.0) return MidrailTrend.STRONG_DOWN;
-        if (val < -0.1) return MidrailTrend.WEAK_DOWN;
+        if (val > 1.0) return MidTrend.STRONG_UP;
+        if (val > 0.1) return MidTrend.WEAK_UP;
+        if (val < -1.0) return MidTrend.STRONG_DOWN;
+        if (val < -0.1) return MidTrend.WEAK_DOWN;
 
-        return MidrailTrend.FLAT;
+        return MidTrend.FLAT;
     }
+
+    // ================= 策略辅助方法 =================
+
+    /**
+     * 综合策略信号示例：
+     * "开口上涨"：中轨向上倾斜 + 布林带开口
+     */
+    public boolean isBullishBreakout(int index) {
+        MouthStatus mouth = getMouthStatus(index);
+        MidTrend trend = getMidTrend(index);
+        return (mouth == MouthStatus.OPENING || mouth == MouthStatus.PARALLEL) &&
+                (trend == MidTrend.STRONG_UP || trend == MidTrend.WEAK_UP);
+    }
+
+    /**
+     * 综合策略信号示例：
+     * "收口盘整"：布林带收口 + 中轨走平或下倾
+     */
+    public boolean isConsolidation(int index) {
+        MouthStatus mouth = getMouthStatus(index);
+        MidTrend trend = getMidTrend(index);
+        return mouth == MouthStatus.SQUEEZING && (trend == MidTrend.FLAT || trend == MidTrend.WEAK_DOWN || trend == MidTrend.STRONG_DOWN);
+    }
+
 
     @Override
     public int getCountOfUnstableBars() {
