@@ -36,18 +36,18 @@ public interface StrategyUtils {
     }
 
 
-    static boolean isHighestNum(List<Num> list, Num num){
+    static boolean isHighestNum(List<Num> list, Num num) {
         for (Num n : list) {
-            if(n.isGreaterThan(num)){
+            if (n != null && n.isGreaterThan(num)) {
                 return false;
             }
         }
         return true;
     }
 
-    static boolean isLowestNum(List<Num> list, Num num){
+    static boolean isLowestNum(List<Num> list, Num num) {
         for (Num n : list) {
-            if(n.isLessThan(num)){
+            if (n != null && n.isLessThan(num)) {
                 return false;
             }
         }

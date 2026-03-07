@@ -83,7 +83,7 @@ public class StockTechMinute extends BaseEntity {
 
     private Long obv;
     private Long obvMa5;
-    private DtOBVMAIndicator.CrossStatus obvGolden;
+    private DtOBVMAIndicator.CrossStatus obvStatus;
 
     // 背离类型：0=无背离,1=MACD顶背离,2=MACD底背离
     private Short divergenceType;

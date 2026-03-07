@@ -145,12 +145,9 @@ public class Ta4jMinuteIndicatorCalculator {
 
         // 5. KDJ（随机指标）短线参数：5 2 2   对短线拐点极其灵敏    -- 隔夜条件：J 在 50~80 之间最稳；J>90 不隔夜。   默认算法可能与通达信/同花顺略有差异（平滑方式）
         DtKDJIndicator kdjInd = new DtKDJIndicator(series, 5, 2, 2);
-        Num[] kdj = kdjInd.getValue(lastIndex);
-        Num k = kdj[0];
-        Num d = kdj[1];
-        Num j = kdj[2];                     // J = 3*K - 2*D
-        Num maxJ = kdj[3];
-        Num minJ = kdj[4];
+        Num k = kdjInd.getK();
+        Num d = kdjInd.getD();
+        Num j = kdjInd.getJ();
         tech.setKdjK(k.bigDecimalValue());
         tech.setKdjD(d.bigDecimalValue());
         tech.setKdjJ(j.bigDecimalValue());
@@ -179,7 +176,7 @@ public class Ta4jMinuteIndicatorCalculator {
         Num obvMa5Num = obvmaInd.getObvMa(lastIndex);
         tech.setObv(obvNum.longValue());
         tech.setObvMa5(obvMa5Num.longValue());
-        tech.setObvGolden(obvmaInd.getCrossStatus(lastIndex));
+        tech.setObvStatus(obvmaInd.getCrossStatus(lastIndex));
 
 
         log.info("-----计算分时指标：{}", JSONObject.toJSONString(tech));
@@ -201,7 +198,7 @@ public class Ta4jMinuteIndicatorCalculator {
             if (vHistNum.isPositiveOrZero() && vHistNum.isLessThan(vPrevHist)) {
                 divergenceStrength++;       // VMACD红柱缩小
             }
-            if (j.isLessThan(maxJ)) {       // KDJ-J未新高 → +1分
+            if (!kdjInd.isHighest()) {       // KDJ-J未新高 → +1分
                 divergenceStrength++;
             }
             if (!rsiInd.isHighest(lastIndex) || rsiInd.isOversold(lastIndex)) {
@@ -217,7 +214,7 @@ public class Ta4jMinuteIndicatorCalculator {
             if (vHistNum.isNegativeOrZero() && vHistNum.isLessThan(vPrevHist)) {
                 divergenceStrength++;       // VMACD绿柱缩小
             }
-            if (j.isGreaterThan(minJ)) {    // KDJ-J未新低 → +1分
+            if (!kdjInd.isLowest()) {       // KDJ-J未新低 → +1分
                 divergenceStrength++;
             }
             if (!rsiInd.isLowest(lastIndex) || rsiInd.isOverbought(lastIndex)) {
@@ -316,10 +313,9 @@ public class Ta4jMinuteIndicatorCalculator {
             }
         }
         // 8. OBVMA 能量潮均线 -- 隔夜条件：OBV > OBV_MA5  10分
-        if (tech.getObvGolden() == DtOBVMAIndicator.CrossStatus.GOLDEN_CROSS) {
+        if (tech.getObvStatus() == DtOBVMAIndicator.CrossStatus.GOLDEN_CROSS) {
             buyScore += 10;
             buyReasons.add("OBV金叉 资金流入(买入信号)");
-//            tech.setObvGolden(GOLDEN_CROSS);
         }
         tech.setBuyScore(buyScore);
         tech.setBuyReason(StringUtil.joinWithIndex(COMMA, buyReasons));
@@ -397,10 +393,9 @@ public class Ta4jMinuteIndicatorCalculator {
             }
         }
         // 8. OBVMA 能量潮均线    10分
-        if (tech.getObvGolden() == DtOBVMAIndicator.CrossStatus.DEATH_CROSS) {
+        if (tech.getObvStatus() == DtOBVMAIndicator.CrossStatus.DEATH_CROSS) {
             sellScore += 10;
             sellReasons.add("OBV死叉 资金流出(卖出信号)");
-//            tech.setObvGolden(DEATH_CROSS);
         }
         tech.setSellScore(sellScore);
         tech.setSellReason(StringUtil.joinWithIndex(COMMA, sellReasons));

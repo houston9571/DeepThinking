@@ -1,5 +1,6 @@
 package com.deepthinking.strategy;
 
+import lombok.Getter;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.indicators.CachedIndicator;
 import org.ta4j.core.indicators.helpers.*;
@@ -12,7 +13,7 @@ import static com.deepthinking.strategy.StrategyUtils.*;
 /**
  * KDJ  （东财 1min 5,2,2）
  */
-public class DtKDJIndicator extends CachedIndicator<Num[]> {
+public class DtKDJIndicator extends CachedIndicator<Num> {
 
 
     private final int N;
@@ -22,9 +23,14 @@ public class DtKDJIndicator extends CachedIndicator<Num[]> {
     private final ClosePriceIndicator close;
     private final HighestValueIndicator highestN;
     private final LowestValueIndicator lowestN;
+    @Getter
     Num k;
+    @Getter
     Num d;
+    @Getter
     Num j;
+    Num maxJ;
+    Num minJ;
 
     public DtKDJIndicator(BarSeries series) {
         this(series, 5, 2, 2);
@@ -39,13 +45,20 @@ public class DtKDJIndicator extends CachedIndicator<Num[]> {
         highestN = new HighestValueIndicator(new HighPriceIndicator(series), n);
         lowestN = new LowestValueIndicator(new LowPriceIndicator(series), n);
         int lastIdx = series.getEndIndex();
-        k = getK(lastIdx);
-        d = getD(lastIdx);
+        k = calcK(lastIdx);
+        d = calcD(lastIdx);
         j = k.multipliedBy(numOf(3)).minus(d.multipliedBy(numOf(2)));    //J = 3K - 2D
+        maxJ = j;
+        minJ = j;
+        for (int i = lastIdx - N + 1; i < lastIdx; i++) {
+            Num tj = calcJ(i);
+            maxJ = maxJ.max(tj);
+            minJ = minJ.min(tj);
+        }
     }
 
     //RSV：最近5根1分钟K
-    private Num getRSV(int index) {
+    private Num calcRSV(int index) {
         Num h = highestN.getValue(index);
         Num l = lowestN.getValue(index);
         Num c = close.getValue(index);
@@ -54,27 +67,26 @@ public class DtKDJIndicator extends CachedIndicator<Num[]> {
         return c.minus(l).dividedBy(h.minus(l)).multipliedBy(NUM_100);
     }
 
-    private Num getK(int index) {
+    private Num calcK(int index) {
         if (index < N - 1)
             return NUM_50;                           // 第一个有效数据点，初始化 K=50, D=50
-        Num rsv = getRSV(index);
+        Num rsv = calcRSV(index);
         if (index == N - 1)                         // 第一根有效K: ((M1-1)/M1 * 50) + ((1/M1) * RSV)
             return NUM_50.multipliedBy(numOf(M1 - 1)).dividedBy(numOf(M1)).plus(rsv.dividedBy(numOf(M1)));
-        return getK(index - 1).multipliedBy(numOf(M1 - 1)).dividedBy(numOf(M1))
+        return calcK(index - 1).multipliedBy(numOf(M1 - 1)).dividedBy(numOf(M1))
                 .plus(rsv.dividedBy(numOf(M1)));    // K = ((M1-1)/M1 * prevK)  + (1/M1) * RSV)
     }
 
-    private Num getD(int index) {
+    private Num calcD(int index) {
         if (index < N - 1) return NUM_50;
-        Num k = getK(index);
+        Num k = calcK(index);
         if (index == N - 1)                         // 第一根有效D: ((M2-1)/M2 * 50) + ((1/M2) * K)
             return NUM_50.multipliedBy(numOf(M2 - 1)).dividedBy(numOf(M2)).plus(k.dividedBy(numOf(M2)));
-        return getD(index - 1).multipliedBy(numOf(M2 - 1)).dividedBy(numOf(M2))
+        return calcD(index - 1).multipliedBy(numOf(M2 - 1)).dividedBy(numOf(M2))
                 .plus(k.dividedBy(numOf(M2)));      // D = ((M2-1)/M2 * prevD) + ((1/M2) * K)
     }
-
-    private Num getJ(int index) {
-        return getK(index).multipliedBy(numOf(3)).minus(getD(index).multipliedBy(numOf(2)));    //J = 3K - 2D
+    private Num calcJ(int index) {
+        return calcK(index).multipliedBy(numOf(3)).minus(calcD(index).multipliedBy(numOf(2)));    //J = 3K - 2D
     }
 
     public enum CrossStatus {
@@ -84,20 +96,13 @@ public class DtKDJIndicator extends CachedIndicator<Num[]> {
     }
 
     @Override
-    protected Num[] calculate(int index) {
-        Num maxJ = j;
-        Num minJ = j;
-        for (int i = index - N + 1; i < index; i++) {
-            Num tj = getJ(i);
-            maxJ = maxJ.max(tj);
-            minJ = minJ.min(tj);
-        }
-        return new Num[]{k, d, j, maxJ, minJ};
+    protected Num calculate(int index) {
+        return j;
     }
 
     public CrossStatus getCrossStatus(int index) {
-        Num kPrev = getK(index - 1);
-        Num dPrev = getD(index - 1);
+        Num kPrev = calcK(index - 1);
+        Num dPrev = calcD(index - 1);
         if (k.isGreaterThan(d) && kPrev.isLessThanOrEqual(dPrev)) {                     // 条件：今日 K > D 且 昨日 K <= D
             return GOLDEN_CROSS;
         } else if (k.isLessThan(d) && kPrev.isGreaterThanOrEqual(dPrev)) {
@@ -107,16 +112,17 @@ public class DtKDJIndicator extends CachedIndicator<Num[]> {
     }
 
 
-//    public boolean isHighest(int index){
-//        return isHighestNum(rsiValues, getValue(index));
-//    }
-//
-//    public boolean isLowest(int index){
-//        return isLowestNum(rsiValues, getValue(index));
-//    }
+    public boolean isHighest() {
+        return getJ().isGreaterThanOrEqual(maxJ);
+    }
+
+    public boolean isLowest() {
+        return getJ().isLessThanOrEqual(minJ);
+    }
 
     @Override
     public int getCountOfUnstableBars() {
         return 0;
     }
 }
+
