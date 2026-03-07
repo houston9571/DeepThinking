@@ -3,25 +3,30 @@ package com.deepthinking.strategy;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.indicators.CachedIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
+import org.ta4j.core.indicators.helpers.VolumeIndicator;
 import org.ta4j.core.num.Num;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.deepthinking.strategy.StrategyUtils.*;
+import static com.deepthinking.strategy.StrategyUtils.NUM_1;
+import static com.deepthinking.strategy.StrategyUtils.NUM_2;
+import static com.deepthinking.strategy.StrategyUtils.numOf;
 
 /**
  * 东方财富版 MACD 指标（ta4j 0.22 + CachedIndicator）
  * 100%对齐东财分时/日线MACD数值，适配1分钟超短线场景
  */
-public class DtMACDIndicator extends CachedIndicator<Num> {
+public class DtVMACDIndicator extends CachedIndicator<Num> {
 
     private List<Num> difValues;
     private List<Num> deaValues;
     private List<Num> histogramValues;
 
-    public DtMACDIndicator(ClosePriceIndicator indicator, int fast, int slow, int signal) {
+    public DtVMACDIndicator(VolumeIndicator indicator, int fast, int slow, int signal) {
         super(indicator);
+
         // 1. 计算快慢 EMA (严格东财逻辑)
         DtEMAIndicator emaFast = new DtEMAIndicator(indicator, fast);
         DtEMAIndicator emaSlow = new DtEMAIndicator(indicator, slow);
@@ -48,7 +53,7 @@ public class DtMACDIndicator extends CachedIndicator<Num> {
         // 3. 计算 DEA = EMA(DIF, signal)
         // 注意：DIF 前面可能有 null (因为 SlowEMA 需要时间预热)，但 EastMoneyEMA 逻辑是 Close[0]=EMA[0]
         // 对于 DIF 序列，我们需要找到第一个非空值作为 "Close[0]" 的等价物
-        deaValues = calculateEMAFromList(difList, signal);
+        deaValues = calculateVEMAFromList(difList, signal);
 
         // 4. 计算柱状图
         histogramValues = new ArrayList<>(count);
@@ -99,8 +104,7 @@ public class DtMACDIndicator extends CachedIndicator<Num> {
         NONE
     }
 
-
-    public CrossStatus getCrossStatus(int index){
+    public DtVMACDIndicator.CrossStatus getCrossStatus(int index){
         Num dif = getDIF(index);
         Num dea = getDEA(index);
         Num prevDif = getDIF(index-1);
@@ -116,6 +120,7 @@ public class DtMACDIndicator extends CachedIndicator<Num> {
         }
         return CrossStatus.NONE;
     }
+
 
     // 红柱放大
     public boolean isRedExpand(int index){
@@ -134,7 +139,7 @@ public class DtMACDIndicator extends CachedIndicator<Num> {
     }
 
 
-    public List<Num> calculateEMAFromList(List<Num> inputData, int period) {
+    public List<Num> calculateVEMAFromList(List<Num> inputData, int period) {
         List<Num> result = new ArrayList<>(inputData.size());
         Num alpha = NUM_2.dividedBy(numOf(period + 1));
         Num oneMinusAlpha = NUM_1.minus(alpha);

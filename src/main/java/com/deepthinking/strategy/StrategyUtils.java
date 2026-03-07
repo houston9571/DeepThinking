@@ -23,6 +23,20 @@ public interface StrategyUtils {
     Num NUM_100 = DecimalNum.valueOf(100);
 
 
+    // 背离类型常量
+    public enum DivergenceType {
+        NONE, TOP, BOTTOM;
+    }
+
+
+    public enum SignalType {
+        BUY, SELL, WATCH;
+    }
+
+    public enum SignalLevel {
+        NONE, WEAK, LOW, MEDIUM, HIGH, HIGHEST;
+    }
+
     static Num numOf(Number n) {
         return DecimalNum.valueOf(n);
     }

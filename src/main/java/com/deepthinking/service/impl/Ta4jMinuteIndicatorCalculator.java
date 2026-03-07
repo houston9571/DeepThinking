@@ -19,9 +19,7 @@ import org.ta4j.core.indicators.averages.SMAIndicator;
 import org.ta4j.core.indicators.bollinger.BollingerBandsLowerIndicator;
 import org.ta4j.core.indicators.bollinger.BollingerBandsMiddleIndicator;
 import org.ta4j.core.indicators.bollinger.BollingerBandsUpperIndicator;
-import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
-import org.ta4j.core.indicators.helpers.HighPriceIndicator;
-import org.ta4j.core.indicators.helpers.VolumeIndicator;
+import org.ta4j.core.indicators.helpers.*;
 import org.ta4j.core.indicators.numeric.NumericIndicator;
 import org.ta4j.core.indicators.statistics.StandardDeviationIndicator;
 import org.ta4j.core.indicators.volume.OnBalanceVolumeIndicator;
@@ -111,9 +109,9 @@ public class Ta4jMinuteIndicatorCalculator {
         tech.setVolumeRatio(BigDecimal.valueOf(tech.getVolume() / ma5));
 
         // 1. EMA（指数移动平均） 短线参数：3 5 10   确定当前波段的多空基调     -- 隔夜条件：价格站上 EMA5/EMA10 → 隔夜安全；跌破 EMA10 → 不隔夜。
-        DtEMAIndicator ema3 = new DtEMAIndicator(series, 3);
-        DtEMAIndicator ema5 = new DtEMAIndicator(series, 5);
-        DtEMAIndicator ema10 = new DtEMAIndicator(series, 10);
+        DtEMAIndicator ema3 = new DtEMAIndicator(closePriceIndicator, 3);
+        DtEMAIndicator ema5 = new DtEMAIndicator(closePriceIndicator, 5);
+        DtEMAIndicator ema10 = new DtEMAIndicator(closePriceIndicator, 10);
         Num ema5Num = ema5.getValue(lastIndex);
         Num ema10Num = ema10.getValue(lastIndex);
         tech.setEma3(ema3.getValue(lastIndex).bigDecimalValue());
@@ -124,7 +122,7 @@ public class Ta4jMinuteIndicatorCalculator {
         tech.setBias(biasInd.getValue(lastIndex).bigDecimalValue());
 
         // 2. MACD（平滑异同移动平均指数）（趋势+动能） 短线参数(fast=5, slow=13, signal=2)   零轴确定长短周期动量方向    -- 隔夜条件：MACD红柱、DIF > DEA。
-        DtMACDIndicator macdInd = new DtMACDIndicator(series, 5, 13, 2);    // 柱状图 (Histogram) = MACD线 - 信号线
+        DtMACDIndicator macdInd = new DtMACDIndicator(closePriceIndicator, 5, 13, 2);    // 柱状图 (Histogram) = MACD线 - 信号线
         DtMACDIndicator.CrossStatus macdStatus = macdInd.getCrossStatus(lastIndex);
         tech.setMacdDif(macdInd.getDIF(lastIndex).bigDecimalValue());
         tech.setMacdDea(macdInd.getDEA(lastIndex).bigDecimalValue());
@@ -160,15 +158,12 @@ public class Ta4jMinuteIndicatorCalculator {
         tech.setWr6(wr.bigDecimalValue());
 
         // 7. VMACD（成交量MACD）  短线参数：5,13,1   量平滑异同平均，量化资金动能    -- 隔夜条件：VMACD 红柱 → 量价配合
-        MACDVIndicator macdv = new MACDVIndicator(volumeIndicator, 5, 13);
-        NumericIndicator vHistInd = macdv.getHistogram(2);
-        Num vDifNum = macdv.getValue(lastIndex);
-        Num vDeaNum = macdv.getSignalLine(2).getValue(lastIndex);
-        Num vHistNum = vHistInd.getValue(lastIndex);               // MACD柱：DIFF与DEA的差值，反映量能动能
-        Num vPrevHist = vHistInd.getValue(lastIndex - 1);
-        tech.setVmacdDif(vDifNum.bigDecimalValue());
-        tech.setVmacdDea(vDeaNum.bigDecimalValue());
-        tech.setVmacdBar(vHistNum.bigDecimalValue());
+        DtVMACDIndicator vmacdInd = new DtVMACDIndicator(volumeIndicator, 5, 13, 2);
+        DtVMACDIndicator.CrossStatus vmacdStatus = vmacdInd.getCrossStatus(lastIndex);
+        tech.setVmacdDif(vmacdInd.getDIF(lastIndex).bigDecimalValue());
+        tech.setVmacdDea(vmacdInd.getDEA(lastIndex).bigDecimalValue());
+        tech.setVmacdBar(vmacdInd.getHistogram(lastIndex).bigDecimalValue());
+        tech.setVmacdStatus(vmacdStatus);
 
         // 8. OBV_MA 能量潮均线确认资金流入流出     -- 隔夜条件：OBV > OBV_MA5
         DtOBVMAIndicator obvmaInd = new DtOBVMAIndicator(series, 5);
@@ -177,25 +172,18 @@ public class Ta4jMinuteIndicatorCalculator {
         tech.setObv(obvNum.longValue());
         tech.setObvMa5(obvMa5Num.longValue());
         tech.setObvStatus(obvmaInd.getCrossStatus(lastIndex));
-
-
-        log.info("-----计算分时指标：{}", JSONObject.toJSONString(tech));
+//        log.info("-----计算分时指标：{}", JSONObject.toJSONString(tech));
 
         // ----------- 顶底背离 ---------------
-        BigDecimal highestPrice = tech.getHigh();
-        BigDecimal lowestPrice = tech.getLow();
-        for (int i = size / 2; i < size; i++) {     //  计算前5个周期
-            StockTechMinute minute = list.get(i);
-            highestPrice = highestPrice.max(minute.getHigh());
-            lowestPrice = lowestPrice.min(minute.getLow());
-        }
-        tech.setDivergenceType(DIVERGENCE_NONE);
+        Num highestN = new HighestValueIndicator(new HighPriceIndicator(series), size / 2).getValue(lastIndex);
+        Num lowestN = new LowestValueIndicator(new LowPriceIndicator(series), size / 2).getValue(lastIndex);
+        tech.setDivergenceType(DivergenceType.NONE);
         short divergenceStrength = 0;
         // 背离（Divergence）是指价格走势与动量指标（如 MACD、RSI、KDJ、OBV）的趋势方向相反，暗示当前动能正在放缓。
-        if (currClose.compareTo(highestPrice) == 0 && !macdInd.isHighest(lastIndex)) {
-            tech.setDivergenceType(DIVERGENCE_TOP);
+        if (currClose.compareTo(highestN.bigDecimalValue()) == 0 && !macdInd.isHighest(lastIndex)) {
+            tech.setDivergenceType(DivergenceType.TOP);
             divergenceStrength++;           // 基础分：VMACD顶背离
-            if (vHistNum.isPositiveOrZero() && vHistNum.isLessThan(vPrevHist)) {
+            if (!vmacdInd.isHighest(lastIndex)) {
                 divergenceStrength++;       // VMACD红柱缩小
             }
             if (!kdjInd.isHighest()) {       // KDJ-J未新高 → +1分
@@ -208,10 +196,10 @@ public class Ta4jMinuteIndicatorCalculator {
                 divergenceStrength++;       // OBV顶背离 OBV能量潮掉头
             }
 
-        } else if (currClose.compareTo(lowestPrice) == 0 && !macdInd.isLowest(lastIndex)) {
-            tech.setDivergenceType(DIVERGENCE_BOTTOM);
+        } else if (currClose.compareTo(lowestN.bigDecimalValue()) == 0 && !macdInd.isLowest(lastIndex)) {
+            tech.setDivergenceType(DivergenceType.BOTTOM);
             divergenceStrength++;
-            if (vHistNum.isNegativeOrZero() && vHistNum.isLessThan(vPrevHist)) {
+            if (vmacdInd.isLowest(lastIndex)) {
                 divergenceStrength++;       // VMACD绿柱缩小
             }
             if (!kdjInd.isLowest()) {       // KDJ-J未新低 → +1分
@@ -225,14 +213,14 @@ public class Ta4jMinuteIndicatorCalculator {
             }
         }
         tech.setDivergenceStrength(divergenceStrength);
-        log.info("-----计算顶底背离：{}", JSONObject.toJSONString(tech));
+//        log.info("-----计算顶底背离：{}", JSONObject.toJSONString(tech));
 
         // ------------- 量价关系 ---------------
-        double prevClose = closePriceIndicator.getValue(lastIndex - 1).doubleValue();
-        double prevHigh = new HighPriceIndicator(series).getValue(lastIndex - 1).doubleValue();
+        double prevClose = list.get(lastIndex - 1).getClose().doubleValue();
+        double prevHigh = list.get(lastIndex - 1).getHigh().doubleValue();
         double high10 = list.stream().mapToDouble(b -> b.getHigh().doubleValue()).max().getAsDouble();
-        calcVolumePriceRise(tech, prevClose, prevHigh, high10, lowestPrice, obvmaInd.isHighest(lastIndex));
-        log.info("-----计算量价关系：{}", JSONObject.toJSONString(tech));
+        calcVolumePriceRise(tech, prevClose, prevHigh, high10, lowestN.bigDecimalValue(), obvmaInd.isHighest(lastIndex));
+//        log.info("-----计算量价关系：{}", JSONObject.toJSONString(tech));
 
         // -------------- 分时多因子共振信号:EMA、MACD、RSI、KDJ、WR、BOLL、VMACD、OBVMA及量价关系（买入和评分）----------------------
         short buyScore = 0;
@@ -301,16 +289,12 @@ public class Ta4jMinuteIndicatorCalculator {
 
         // 三 量价类指标 量能确认 (VMACD + OBVMA)：25分
         // 7. VMACD 量能验证真伪关键   -- 隔夜条件：VMACD 红柱 → 量价配合  15分
-        if (vHistNum.isPositiveOrZero() && vDifNum.isGreaterThan(vDeaNum)) {
-            if (vHistNum.isPositiveOrZero() && vHistNum.isGreaterThan(vPrevHist)) {     // 金叉且红柱放大
-                buyScore += 15;
-                buyReasons.add("VMACD零轴上金叉且红柱放大(放量)");
-//                tech.setVmacdGolden(GOLDEN_CROSS_RED);
-            } else {
-                buyScore += 10;
-                buyReasons.add("VMACD零轴上金叉(放量)");
-//                tech.setVmacdGolden(GOLDEN_CROSS);
-            }
+        if (vmacdStatus == DtVMACDIndicator.CrossStatus.GOLDEN_CROSS_RED) {   // 金叉且红柱放大
+            buyScore += 15;
+            buyReasons.add("VMACD零轴上金叉且红柱放大(放量)");
+        } else if (vmacdStatus == DtVMACDIndicator.CrossStatus.GOLDEN_CROSS) {
+            buyScore += 10;
+            buyReasons.add("VMACD零轴上金叉(放量)");
         }
         // 8. OBVMA 能量潮均线 -- 隔夜条件：OBV > OBV_MA5  10分
         if (tech.getObvStatus() == DtOBVMAIndicator.CrossStatus.GOLDEN_CROSS) {
@@ -383,14 +367,12 @@ public class Ta4jMinuteIndicatorCalculator {
 
         // 三 量价类指标 量能确认 (VMACD + OBVMA)：25分
         // 7. VMACD（成交量MACD）   15分
-        if (vDifNum.isNegative() && vDifNum.isLessThan(vDeaNum)) {
-            if (vHistNum.isNegativeOrZero() && vHistNum.isGreaterThan(vPrevHist)) {
-                sellScore += 15;
-                sellReasons.add("VMACD零轴下死叉且绿柱放大(缩量)");
-            } else {
-                sellScore += 10;
-                sellReasons.add("VMACD零轴下死叉(缩量)");
-            }
+        if (vmacdStatus == DtVMACDIndicator.CrossStatus.DEATH_CROSS_GREEN) {
+            sellScore += 15;
+            sellReasons.add("VMACD零轴下死叉且绿柱放大(缩量)");
+        } else if (vmacdStatus == DtVMACDIndicator.CrossStatus.DEATH_CROSS) {
+            sellScore += 10;
+            sellReasons.add("VMACD零轴下死叉(缩量)");
         }
         // 8. OBVMA 能量潮均线    10分
         if (tech.getObvStatus() == DtOBVMAIndicator.CrossStatus.DEATH_CROSS) {
@@ -399,7 +381,6 @@ public class Ta4jMinuteIndicatorCalculator {
         }
         tech.setSellScore(sellScore);
         tech.setSellReason(StringUtil.joinWithIndex(COMMA, sellReasons));
-        log.info("-----计算信号共振：{}", JSONObject.toJSONString(tech));
 
         return tech;
     }
@@ -426,8 +407,8 @@ public class Ta4jMinuteIndicatorCalculator {
         double priceChangePercent = body / currOpen * 100;  // 计算涨跌幅 (实体)
         String tag = String.format("(涨幅%.2f%% 量比%.2f),", priceChangePercent, volumeRatio);
 
-        short signalLevel = SIGNAL_NONE;
-        short signalTpye = OPERATING_WATCH;
+        SignalType signalTpye = SignalType.WATCH;
+        SignalLevel signalLevel = SignalLevel.NONE;
         String signalResult = "量能持平";
         int score = 1;
         List<String> reasons = Lists.newArrayList();
@@ -442,15 +423,15 @@ public class Ta4jMinuteIndicatorCalculator {
                 if (!isPositiveCandle) {            // 基础条件：必须是阳线且放量
                     reasons.add("非阳线，不满足量增价升");
                 } else if (!isVolumeSurge) {        // 成交量未显著放大
-                    signalLevel = SIGNAL_WEAK;
+                    signalLevel = SignalLevel.WEAK;
                     reasons.add("阳线但成交量未显著放大(量比=" + String.format("%.2f", volumeRatio) + ")");
                 } else {                             // 阳线且放量
                     // 进阶过滤 1: 排除“巨量滞涨” (最危险的陷阱)
                     if (volumeRatio >= 3.0 && priceChangePercent < 0.5) {
-                        signalLevel = SIGNAL_LOW;
+                        signalLevel = SignalLevel.LOW;
                         reasons.add("❌巨量滞涨：量比>3但涨幅小(主力可能在对倒出货！)");
                     } else if (volumeRatio >= 3.0 && hasLongUpperShadow) {
-                        signalLevel = SIGNAL_LOW;
+                        signalLevel = SignalLevel.LOW;
                         reasons.add("❌巨量滞涨：量比>3但上影线长(主力可能在对倒出货！)");
                     } else {
                         // --- 逻辑判断 ---
@@ -477,18 +458,18 @@ public class Ta4jMinuteIndicatorCalculator {
 
                         // 最终决策
                         if (score >= 4) {
-                            signalLevel = SIGNAL_HIGHEST;
-                            signalTpye = OPERATING_BUY;
+                            signalLevel = SignalLevel.HIGHEST;
+                            signalTpye = SignalType.BUY;
                             reasons.add("✅有效量增价升，主力真金白银进攻，可跟随！");
                         } else if (score == 3) {
-                            signalLevel = SIGNAL_HIGH;
-                            signalTpye = OPERATING_BUY;
+                            signalLevel = SignalLevel.HIGH;
+                            signalTpye = SignalType.BUY;
                             reasons.add("✅有效量增价升，可轻仓试错，设好止损。");
                         } else if (score == 2) {
-                            signalLevel = SIGNAL_MEDIUM;
+                            signalLevel = SignalLevel.MEDIUM;
                             reasons.add("⚪普通量增价升，可轻仓试错，设好止损。");
                         } else {
-                            signalLevel = SIGNAL_LOW;
+                            signalLevel = SignalLevel.LOW;
                             reasons.add("信号不够强，建议观望。");
                         }
                     }
@@ -498,7 +479,7 @@ public class Ta4jMinuteIndicatorCalculator {
                 // --- 逻辑判断 ---
                 // 基础条件：必须是阴线且放量
                 if (!isPositiveCandle && !isVolumeSurge) {
-                    signalLevel = SIGNAL_WEAK;
+                    signalLevel = SignalLevel.WEAK;
                     reasons.add("阴线但成交量未显著放大，可能是洗盘");
                 } else {
                     reasons.add(String.format("✅下跌(量比%.2f)", volumeRatio));
@@ -531,18 +512,18 @@ public class Ta4jMinuteIndicatorCalculator {
                     }
                     // 最终决策
                     if (score >= 6) {
-                        signalLevel = SIGNAL_HIGHEST;
-                        signalTpye = OPERATING_SELL;
+                        signalLevel = SignalLevel.HIGHEST;
+                        signalTpye = SignalType.SELL;
                         reasons.add("🔴 极度危险！放量破位大跌，立即清仓，严禁抄底");
                     } else if (score >= 4) {
-                        signalLevel = SIGNAL_HIGH;
-                        signalTpye = OPERATING_SELL;
+                        signalLevel = SignalLevel.HIGH;
+                        signalTpye = SignalType.SELL;
                         reasons.add("⚠️ 警告：放量下跌，趋势转弱，建议减仓或离场");
                     } else if (score >= 2) {
-                        signalLevel = SIGNAL_MEDIUM;
+                        signalLevel = SignalLevel.MEDIUM;
                         reasons.add("📉 放量杀跌，切勿急于接飞刀，等待企稳信号");
                     } else {
-                        signalLevel = SIGNAL_LOW;
+                        signalLevel = SignalLevel.LOW;
                         reasons.add("信号不够强，建议观望。");
                     }
                 }
@@ -551,36 +532,36 @@ public class Ta4jMinuteIndicatorCalculator {
 
         } else if (isVolDown) {
             if (isPriceUp) {      // ⚠️ 量缩价升 减仓/警戒 可能是主力高度控盘、锁仓拉升的“黄金信号”，也可能是买盘枯竭、诱多出货的“死亡陷阱”。
-                boolean hasTopDivergence = tech.getDivergenceType() == DIVERGENCE_TOP;
+                boolean hasTopDivergence = tech.getDivergenceType() == DivergenceType.TOP;
                 boolean isNewHigh = tech.getHigh().doubleValue() >= high10;
                 boolean isHighPosition = tech.getBias().doubleValue() >= 0.08;  // 高位(乖离率>8%)
                 if (isHighPosition && isNewHigh) {      // 场景 A: 高位 + 创新高 + 背离/极度缩量 -> 危险诱多
-                    signalLevel = SIGNAL_HIGH;
-                    signalTpye = OPERATING_SELL;
+                    signalLevel = SignalLevel.HIGH;
+                    signalTpye = SignalType.SELL;
                     if (hasTopDivergence || volumeRatio < 0.5) {
-                        signalLevel = SIGNAL_HIGHEST;
+                        signalLevel = SignalLevel.HIGHEST;
                         reasons.add("💣 高位量缩创新高+(背离/极度缩量)=主力诱多陷阱(立即止盈/清仓)");
                     }
                 } else if (ema5 <= ema10) {    // 场景 B: 下跌趋势中的缩量涨 -> 弱势反弹
-                    signalLevel = SIGNAL_HIGH;
-                    signalTpye = OPERATING_SELL;
+                    signalLevel = SignalLevel.HIGH;
+                    signalTpye = SignalType.SELL;
                     reasons.add("⚠️下跌趋势中的无量反弹，买盘不足，观望切勿抄底，反弹随时结束");
                     if (hasTopDivergence) {     // 检测顶背离 (价格新高，MACD未新高)
-                        signalLevel = SIGNAL_HIGHEST;
+                        signalLevel = SignalLevel.HIGHEST;
                         reasons.add("🔴 检测到顶背离：价格新高，但MACD动能减弱");
                     }
                 } else if (!isHighPosition) {  // 场景 C: 主升浪中段 + 缩量涨 -> 良性锁仓
                     // 即使创新高，只要乖离率不大且无明显背离，视为锁仓
-                    signalLevel = SIGNAL_HIGH;
-                    signalTpye = OPERATING_BUY;
+                    signalLevel = SignalLevel.HIGH;
+                    signalTpye = SignalType.BUY;
                     if (isNewHigh) {
                         reasons.add("🚀 主升浪创新高，缩量表明抛压轻，主力锁仓良好");
                     } else {
                         reasons.add("✅ 上升趋势中缩量整理后上涨，健康信号");
                     }
                     if (hasTopDivergence) {     // 检测顶背离 (价格新高，MACD未新高)
-                        signalLevel = SIGNAL_MEDIUM;
-                        signalTpye = OPERATING_WATCH;
+                        signalLevel = SignalLevel.MEDIUM;
+                        signalTpye = SignalType.WATCH;
                         reasons.add("🔴 检测到顶背离：价格新高，但MACD动能减弱");
                     }
                 }
@@ -593,8 +574,8 @@ public class Ta4jMinuteIndicatorCalculator {
                 boolean atSupportBoll = currClose <= tech.getBollLower().doubleValue() * 1.01;
                 // 场景 A: 上升趋势 + 回踩支撑 + 缩量 -> 良性洗盘 (GOOD_WASHOUT)
                 if (currClose > ema10 && atSupportBoll) {
-                    signalLevel = SIGNAL_MEDIUM;
-                    signalTpye = OPERATING_WATCH;
+                    signalLevel = SignalLevel.MEDIUM;
+                    signalTpye = SignalType.WATCH;
                     reasons.add("🟢 上升趋势回踩支撑(EMA10/BOLL下轨)");
                     reasons.add("✅ 成交量极度萎缩，表明主力未出逃，散户惜售");      // 关注：若次日放量阳线反包，可大胆买入
                     // 判断K线形态 (是否止跌)
@@ -603,18 +584,18 @@ public class Ta4jMinuteIndicatorCalculator {
                     double lowerShadow = tech.getLow().doubleValue() - currClose;
                     boolean hasLowerShadow = lowerShadow > (Math.abs(bodySize) * 0.5); // 有下影线
                     if (hasLowerShadow || isSmallCandle) {
-                        signalLevel = SIGNAL_HIGH;
+                        signalLevel = SignalLevel.HIGH;
                         reasons.add("✨ K线出现止跌迹象(下影线/小阴线)，变盘在即");
                     }
                 } else if (currClose < ema10) {      // 场景 B: 下跌趋势 + 无量阴跌 -> 恶性杀跌 (DANGER_BLEED)
-                    signalLevel = SIGNAL_HIGHEST;
-                    signalTpye = OPERATING_SELL;
+                    signalLevel = SignalLevel.HIGHEST;
+                    signalTpye = SignalType.SELL;
                     reasons.add("🔴 处于下跌趋势中(价格<EMA10)");                 // 严禁抄底：买盘枯竭，阴跌不止，深不见底
                     reasons.add("❌ 缩量下跌无承接，少量卖单即可打压股价");
                     reasons.add("⚠️ '钝刀割肉'最伤人，必须等放量止跌信号");
                 } else if (prevClose > ema10 && currClose < ema10) {           // 场景 C: 高位破位后的缩量跌 -> 下跌中继 (NEUTRAL_FALL)
-                    signalLevel = SIGNAL_HIGH;
-                    signalTpye = OPERATING_SELL;
+                    signalLevel = SignalLevel.HIGH;
+                    signalTpye = SignalType.SELL;
                     reasons.add("⚠️ 刚刚跌破关键支撑(EMA10)");                   // 观望：破位初期缩量，可能是下跌中继，勿急于接飞刀
                     reasons.add("⚪ 缩量表明反弹无力，可能继续探底");
                 }

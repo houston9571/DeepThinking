@@ -3,10 +3,7 @@ package com.deepthinking.mysql.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.deepthinking.strategy.DtBOLLIndicator;
-import com.deepthinking.strategy.DtKDJIndicator;
-import com.deepthinking.strategy.DtMACDIndicator;
-import com.deepthinking.strategy.DtOBVMAIndicator;
+import com.deepthinking.strategy.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -43,8 +40,8 @@ public class StockTechMinute extends BaseEntity {
     private Long totalVolume;
     private Long totalAmount;
     private BigDecimal volumeRatio;
-    private Short signalType;
-    private Short signalLevel;
+    private StrategyUtils.SignalType signalType;
+    private StrategyUtils.SignalLevel signalLevel;
     private String signalResult;
 
     private BigDecimal ema3;
@@ -79,14 +76,14 @@ public class StockTechMinute extends BaseEntity {
     private BigDecimal vmacdDif;
     private BigDecimal vmacdDea;
     private BigDecimal vmacdBar;
-    private Short vmacdGolden;
+    private DtVMACDIndicator.CrossStatus vmacdStatus;
 
     private Long obv;
     private Long obvMa5;
     private DtOBVMAIndicator.CrossStatus obvStatus;
 
     // 背离类型：0=无背离,1=MACD顶背离,2=MACD底背离
-    private Short divergenceType;
+    private StrategyUtils.DivergenceType divergenceType;
     // 背离强度：0~5（值越大背离越明显）
     private Short divergenceStrength;
 

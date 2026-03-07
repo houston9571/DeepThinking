@@ -20,7 +20,7 @@ public class DtKDJIndicator extends CachedIndicator<Num> {
     private final int M1;
     private final int M2;
 
-    private final ClosePriceIndicator close;
+    private final ClosePriceIndicator closePriceIndicator;
     private final HighestValueIndicator highestN;
     private final LowestValueIndicator lowestN;
     @Getter
@@ -41,7 +41,7 @@ public class DtKDJIndicator extends CachedIndicator<Num> {
         N = n;
         M1 = m1;
         M2 = m2;
-        close = new ClosePriceIndicator(series);
+        closePriceIndicator = new ClosePriceIndicator(series);
         highestN = new HighestValueIndicator(new HighPriceIndicator(series), n);
         lowestN = new LowestValueIndicator(new LowPriceIndicator(series), n);
         int lastIdx = series.getEndIndex();
@@ -61,7 +61,7 @@ public class DtKDJIndicator extends CachedIndicator<Num> {
     private Num calcRSV(int index) {
         Num h = highestN.getValue(index);
         Num l = lowestN.getValue(index);
-        Num c = close.getValue(index);
+        Num c = closePriceIndicator.getValue(index);
         if (h.isEqual(l))
             return NUM_50;
         return c.minus(l).dividedBy(h.minus(l)).multipliedBy(NUM_100);

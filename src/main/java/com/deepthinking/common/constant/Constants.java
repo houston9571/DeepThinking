@@ -25,25 +25,6 @@ public interface Constants {
     short DELETED = -1;
 
 
-    short EXPAND = 1;
-    short SHRINK = -1;
-
-    // 背离类型常量
-    short DIVERGENCE_NONE = 0;
-    short DIVERGENCE_TOP = 1;
-    short DIVERGENCE_BOTTOM = 2;
-
-    short OPERATING_BUY = 1;
-    short OPERATING_SELL = 2;
-    short OPERATING_WATCH = 3;
-
-    short SIGNAL_NONE = 1;
-    short SIGNAL_WEAK = 2;
-    short SIGNAL_LOW = 3;
-    short SIGNAL_MEDIUM = 4;
-    short SIGNAL_HIGH = 5;
-    short SIGNAL_HIGHEST = 6;
-
     BigDecimal HUNDRED = new BigDecimal(100);
 
     BigDecimal THOUSAND = new BigDecimal("1000");

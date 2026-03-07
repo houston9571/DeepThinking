@@ -1,6 +1,7 @@
 package com.deepthinking.strategy;
 
 import org.ta4j.core.BarSeries;
+import org.ta4j.core.Indicator;
 import org.ta4j.core.indicators.CachedIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.num.Num;
@@ -21,13 +22,13 @@ import static com.deepthinking.strategy.StrategyUtils.*;
  */
 public class DtEMAIndicator extends CachedIndicator<Num> {
 
-    private final ClosePriceIndicator closePrice;
+    private final Indicator<Num> indicator;
     private final int barCount; // 周期 N
     private List<Num> emaValues;
 
-    public DtEMAIndicator(BarSeries series, int n) {
-        super(series);
-        this.closePrice = new ClosePriceIndicator(series);
+    public DtEMAIndicator(Indicator<Num> indicator, int n) {
+        super(indicator);
+        this.indicator = indicator;
         this.barCount = n;
         preCalculate();
     }
@@ -43,12 +44,12 @@ public class DtEMAIndicator extends CachedIndicator<Num> {
         Num oneMinusAlpha = NUM_1.minus(alpha);
 
         // 2. 初始化：EMA[0] = Close[0] (东财核心逻辑)
-        Num currentEma = closePrice.getValue(0);
+        Num currentEma = indicator.getValue(0);
         emaValues.add(currentEma);
 
         // 3. 递推计算
         for (int i = 1; i < seriesLength; i++) {
-            Num close = closePrice.getValue(i);
+            Num close = indicator.getValue(i);
             // EMA = Close * alpha + PrevEMA * (1 - alpha)
             currentEma = close.multipliedBy(alpha).plus(currentEma.multipliedBy(oneMinusAlpha));
             emaValues.add(currentEma);
