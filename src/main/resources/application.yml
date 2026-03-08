@@ -49,9 +49,9 @@ spring:
     name: quant
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/quant?rewriteBatchedStatements=true
-    username: root
-    password: 88888888
+    url: jdbc:mysql://127.0.0.1:9571/quant?rewriteBatchedStatements=true
+    username: quant
+    password: 3cf1c9ee82392c9
     hikari:
       pool-name: DatebookHikariCP
       auto-commit: true

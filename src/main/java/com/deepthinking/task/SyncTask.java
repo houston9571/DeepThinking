@@ -2,6 +2,7 @@ package com.deepthinking.task;
 
 import com.deepthinking.common.thread.Threads;
 import com.deepthinking.common.utils.DateUtils;
+import com.deepthinking.common.utils.OSUtils;
 import com.deepthinking.ext.base.Result;
 import com.deepthinking.service.*;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static com.deepthinking.common.constant.MarketType.*;
 
@@ -33,6 +36,15 @@ public class SyncTask {
     private final DragonDeptService dragonDeptService;
 
     private final DragonStockService dragonStockService;
+
+    @Scheduled(cron = "0 0/2 * * * ?")
+    void syncS() {
+        LinkedHashMap  map = (LinkedHashMap )OSUtils.getSystemInfo().get("JVM");
+        log.info(" --> {}:{}", "TotalMemory", map.get("TotalMemory"));
+        log.info(" --> {}:{}", "MaxMemory", map.get("MaxMemory"));
+        log.info(" --> {}:{}", "FreeMemory", map.get("FreeMemory"));
+        log.info(" --> {}:{}", "RealUsage", map.get("RealUsage"));
+    }
 
     /**************************** 股票行情 ***********************************/
 
