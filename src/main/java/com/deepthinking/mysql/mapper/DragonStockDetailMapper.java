@@ -18,9 +18,9 @@ public interface DragonStockDetailMapper extends BaseMapper<DragonStockDetail> {
             " c.net_buy_amount, c.total_net_buy_ratio, c.buy_amount, c.sell_amount " +
             " FROM org_partner a LEFT JOIN org_partner_dept b ON a.partner_code=b.partner_code " +
             "LEFT JOIN dragon_stock_detail c ON b.dept_code=c.dept_code " +
-            " WHERE c.trade_date = #{tradeDate} " +
+            " WHERE c.trade_date = (SELECT trade_date FROM dragon_stock_detail ORDER BY trade_date DESC LIMIT 1)  " +
             ") x GROUP BY partner_code, partner_name, stock_code, stock_name, trade_date, close, change_percent " +
             "ORDER BY net_buy_amount DESC ")
-    List<DragonStockDetail> queryDragonStockDetailWithPartner(String tradeDate);
+    List<DragonStockDetail> queryDragonStockDetailWithPartner();
 
 }

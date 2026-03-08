@@ -20,8 +20,8 @@ public interface DragonStockMapper extends BaseMapper<DragonStock> {
             "LEFT JOIN dragon_stock_detail c on b.dept_code=c.dept_code " +
             "LEFT JOIN dragon_stock d on c.stock_code=d.stock_code AND c.trade_date=d.trade_date " +
             "LEFT JOIN stock_kline_daily e on c.stock_code=e.stock_code AND c.trade_date=e.trade_date " +
-            "WHERE c.trade_date=#{tradeDate}")
-    List<DragonDetailStockKline> queryDragonStockList(@Param("tradeDate") String tradeDate);
+            "WHERE c.trade_date= (SELECT trade_date FROM dragon_stock_detail ORDER BY trade_date DESC LIMIT 1) ")
+    List<DragonDetailStockKline> queryDragonStockList();
 
     @Select("SELECT y.*, d.*, e.* " +
             "FROM ( " +
@@ -30,7 +30,7 @@ public interface DragonStockMapper extends BaseMapper<DragonStock> {
             "  SELECT a.partner_code, a.partner_name, c.stock_code, c.stock_name, c.trade_date, c.net_buy_amount, c.total_net_buy_ratio, c.buy_amount, c.sell_amount " +
             "  FROM org_partner a LEFT JOIN org_partner_dept b ON a.partner_code=b.partner_code " +
             "  LEFT JOIN dragon_stock_detail c ON b.dept_code=c.dept_code " +
-            "  WHERE c.stock_code= #{stockCode} AND c.trade_date>'2026-02-10'" +
+            "  WHERE c.stock_code= #{stockCode} " +
             "  ) x GROUP BY partner_code, partner_name, stock_code, stock_name, trade_date " +
             " ORDER BY trade_date DESC " +
             ") y " +
@@ -45,7 +45,7 @@ public interface DragonStockMapper extends BaseMapper<DragonStock> {
             " FROM ( " +
             "  SELECT a.`code` AS partner_code, a.name AS partner_name, c.`code`, c.`name`, c.trade_date, c.net_buy_amount, c.total_net_buy_ratio, c.buy_amount, c.sell_amount " +
             "  FROM org_partner a LEFT JOIN org_partner_dept b ON a.`code`=b.partner_code LEFT JOIN dragon_stock_detail c ON b.dept_code=c.dept_code " +
-            "  WHERE a.stockCode= #{stockCode} AND c.trade_date>'2026-02-10'" +
+            "  WHERE a.stockCode= #{stockCode} " +
             "  ) x GROUP BY partner_code, partner_name, `code`, `name`, trade_date " +
             " ORDER BY trade_date DESC " +
             ") y " +

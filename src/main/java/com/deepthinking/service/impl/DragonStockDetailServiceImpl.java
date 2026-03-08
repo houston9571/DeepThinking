@@ -44,8 +44,8 @@ public class DragonStockDetailServiceImpl extends MybatisBaseServiceImpl<DragonS
     /**
      * 查询龙虎榜游资席位买入详情，合并为按游资的竖型列表，第一行表头游资
      */
-    public List<List<DragonStockDetail>> queryDragonStockDetailWithPartner(String tradeDate) {
-        List<DragonStockDetail> list = dragonStockDetailMapper.queryDragonStockDetailWithPartner(tradeDate);
+    public List<List<DragonStockDetail>> queryDragonStockDetailWithPartner() {
+        List<DragonStockDetail> list = dragonStockDetailMapper.queryDragonStockDetailWithPartner();
         Map<String, List<DragonStockDetail>> map = Maps.newLinkedHashMap();
         Map<String, DragonStockDetail> totalNet = Maps.newLinkedHashMap();
         Map<String, List<DragonStockDetail>> partners = Maps.newLinkedHashMap();

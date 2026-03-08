@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DragonStockService {
 
-    List<DragonDetailStockKline> queryDragonStockList(String tradeDate);
+    List<DragonDetailStockKline> queryDragonStockList();
 
     List<DragonDetailStockKline> queryDragonStockDetail(String stockCode);
 

@@ -126,7 +126,7 @@
 
     // 异步请求函数必须要写在外面，然后在vue里面调用
     function asyncLoadDate() {
-        axios.get(url + 'dragon/partner/2026-02-13').then(function (response) {
+        axios.get(url + 'dragon/partner').then(function (response) {
             if (response.status === 200) {
                 vm.fillData(response);
             }

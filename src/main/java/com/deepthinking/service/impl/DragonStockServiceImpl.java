@@ -46,8 +46,8 @@ public class DragonStockServiceImpl extends MybatisBaseServiceImpl<DragonStockMa
     /**
      * 查询当天龙虎榜列表，按游资分类
      */
-    public List<DragonDetailStockKline> queryDragonStockList(String tradeDate) {
-        return dragonStockMapper.queryDragonStockList(tradeDate);
+    public List<DragonDetailStockKline> queryDragonStockList() {
+        return dragonStockMapper.queryDragonStockList();
     }
 
     public List<DragonDetailStockKline> queryDragonStockDetail(String stockCode) {

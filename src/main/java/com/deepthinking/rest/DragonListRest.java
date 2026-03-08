@@ -30,18 +30,18 @@ public class DragonListRest {
     /**
      * 按游资席位查询最近龙虎榜，竖型列表，第一行表头日期
      */
-    @GetMapping("partner/{tradeDate}")
-    public Result<List<List<DragonStockDetail>>> conceptList(@PathVariable String tradeDate) {
-        return Result.success(dragonStockDetailService.queryDragonStockDetailWithPartner(tradeDate));
+    @GetMapping("partner")
+    public Result<List<List<DragonStockDetail>>> conceptList( ) {
+        return Result.success(dragonStockDetailService.queryDragonStockDetailWithPartner());
     }
 
 
     /**
      * 查询当天龙虎榜列表，按游资分类
      */
-    @GetMapping("stock/{tradeDate}")
-    public Result<List<DragonDetailStockKline>> queryDragonStockList(@PathVariable String tradeDate) {
-        return Result.success(dragonStockService.queryDragonStockList(tradeDate));
+    @GetMapping("stock")
+    public Result<List<DragonDetailStockKline>> queryDragonStockList() {
+        return Result.success(dragonStockService.queryDragonStockList());
     }
 
 

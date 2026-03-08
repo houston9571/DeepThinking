@@ -34,7 +34,6 @@ public class SyncTask {
 
     private final DragonStockService dragonStockService;
 
-
     /**************************** 股票行情 ***********************************/
 
     @Scheduled(cron = "0 0/1 9-12,13-15 ? * 1-5")
