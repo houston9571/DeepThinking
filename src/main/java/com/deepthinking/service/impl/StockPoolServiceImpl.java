@@ -43,6 +43,8 @@ public class StockPoolServiceImpl extends MybatisBaseServiceImpl<StockPoolMapper
     /**
      * 精选股票加入股票池
      */
-    public
+    public void addStockPool(){
+        // todo
+    }
 
 }
