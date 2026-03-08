@@ -7,14 +7,19 @@ import com.alibaba.fastjson2.JSONObject;
 import com.deepthinking.client.EastMoneyConceptApi;
 import com.deepthinking.common.utils.DateUtils;
 import com.deepthinking.common.constant.MarketType;
+import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.ConceptDelay;
+import com.deepthinking.mysql.entity.StockKlineDaily;
+import com.deepthinking.mysql.entity.StockPool;
 import com.deepthinking.mysql.mapper.ConceptDelayMapper;
 import com.deepthinking.service.ConceptDelayService;
+import com.deepthinking.service.StockPoolService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.bcel.generic.RET;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.deepthinking.common.constant.Constants.*;
+import static com.deepthinking.common.enums.ErrorCode.NOT_GET_PAGE_ERROR;
 
 @Slf4j
 @Service
@@ -35,6 +41,8 @@ public class ConceptDelayServiceImpl extends MybatisBaseServiceImpl<ConceptDelay
     private final ConceptDelayMapper conceptDelayMapper;
 
     private final EastMoneyConceptApi eastMoneyConceptApi;
+
+    private final StockPoolService stockPoolService;
 
     /**
      * 概念板块查询，竖型列表，第一行表头日期
@@ -61,10 +69,14 @@ public class ConceptDelayServiceImpl extends MybatisBaseServiceImpl<ConceptDelay
 
     /**
      * 概念板块列表，按涨跌幅排序
-     * all=false,只更新涨幅前tops的板块
      */
-    public void syncConceptTradeList(boolean all, int top) {
-        int total = 0, pageNum = 0, pageSize = all ? 100 : top;
+    public void syncConceptTradeList(int top) {
+        int total = 0, pageNum = 0, pageSize = 100;
+        int pageCount = top / pageSize + (top % pageSize > 0 ? 1 : 0);
+        if (top < pageSize) {
+            pageCount = 1;
+            pageSize = top;
+        }
         List<ConceptDelay> list = new ArrayList<>();
         do {
             JSONObject json = eastMoneyConceptApi.syncConceptTradeList(++pageNum, pageSize, System.currentTimeMillis());
@@ -88,8 +100,46 @@ public class ConceptDelayServiceImpl extends MybatisBaseServiceImpl<ConceptDelay
             if (array.size() < pageSize) {
                 break;
             }
-        } while (all);
+            pageCount--;
+        } while (pageCount > 0);
         log.info(">>>>>syncConceptTradeList finished total:{} list:{} ", total, list.size());
+
+        if(top <= 50) {
+            int count = 0;
+            for (ConceptDelay delay : list) {
+                count += syncConceptStocks(delay.getConceptCode(), delay.getConceptName(), delay.getTradeDate());
+            }
+            log.info(">>>>>syncConceptStocks finished stock_count:{} ", count);
+        }
+    }
+
+    /**
+     * 概念板块下的股票
+     */
+    private int syncConceptStocks(String conceptCode, String conceptName, LocalDate tradeDate) {
+        int count = 0;
+        try {
+            JSONObject json = eastMoneyConceptApi.syncConceptStocks(conceptCode, System.currentTimeMillis());
+            JSONObject data = json.getJSONObject(LABEL_DATA);
+            if (Objects.isNull(data) || !data.containsKey("diff")) {
+                log.error(NOT_GET_PAGE_ERROR.getMsg("syncConceptStocks ConceptCode=" + conceptCode));
+            }
+            JSONArray array = data.getJSONArray("diff");
+            log.info(">>>>>syncConceptStocks   data:{} total:{}", array.size(), data.getInteger(LABEL_TOTAL));
+            for (int i = 0; i < array.size(); i++) {
+                StockPool pool = JSONObject.parseObject(array.getString(i), StockPool.class);
+                pool.setTradeDate(tradeDate);
+                pool.setConceptCode(conceptCode);
+                pool.setConceptName(conceptName);
+                // todo 筛选股票进入股票池
+
+                stockPoolService.saveOrUpdate(pool, new String[]{"stock_code", "trade_date", "concept_code"});
+                count++;
+            }
+        } catch (Exception e) {
+            log.error(">>>>>syncConceptStocks {} {} {}", conceptCode, conceptName, e.getMessage());
+        }
+        return count;
     }
 
     /**
@@ -120,5 +170,6 @@ public class ConceptDelayServiceImpl extends MybatisBaseServiceImpl<ConceptDelay
             log.error(">>>>>syncConceptFundsFlow {} {} {}", conceptDelay.getConceptCode(), conceptDelay.getConceptName(), e.getMessage());
         }
     }
+
 }
 

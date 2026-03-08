@@ -54,16 +54,6 @@ public class StockInfoServiceImpl extends MybatisBaseServiceImpl<StockInfoMapper
     SpriderTemplateParser spiderTemplateParser;
 
     public Result<Integer> syncStockInfoAll() {
-        List<StockInfo> inserts = stockInfoMapper.queryStockInfoNotIn();
-        log.error(">>>>>syncStockInfoAll start. 新增：{}", inserts.size());
-        for (StockInfo daily : inserts) {
-            Result<StockInfo> result = syncStockInfo(daily.getStockCode());
-            if (result.isSuccess()) {
-                syncStockConceptList(daily.getStockCode());
-            }
-        }
-        log.error(">>>>>syncStockInfoAll end. 新增：{}", inserts.size());
-
         List<StockInfo> updates = findAll();
         log.error(">>>>>syncStockInfoAll start. 更新：{}", updates.size());
         for (StockInfo daily : updates) {
@@ -73,6 +63,16 @@ public class StockInfoServiceImpl extends MybatisBaseServiceImpl<StockInfoMapper
             }
         }
         log.error(">>>>>syncStockInfoAll end. 更新：{}", updates.size());
+
+        List<StockInfo> inserts = stockInfoMapper.queryStockInfoNotIn();
+        log.error(">>>>>syncStockInfoAll start. 新增：{}", inserts.size());
+        for (StockInfo daily : inserts) {
+            Result<StockInfo> result = syncStockInfo(daily.getStockCode());
+            if (result.isSuccess()) {
+                syncStockConceptList(daily.getStockCode());
+            }
+        }
+        log.error(">>>>>syncStockInfoAll end. 新增：{}", inserts.size());
         return Result.success(inserts.size() + updates.size());
     }
 

@@ -15,6 +15,7 @@ import com.deepthinking.mysql.entity.StockKlineDaily;
 import com.deepthinking.mysql.mapper.DragonStockMapper;
 import com.deepthinking.mysql.vo.DragonDetailPartner;
 import com.deepthinking.mysql.vo.DragonDetailStockKline;
+import com.deepthinking.service.DragonStockDetailService;
 import com.deepthinking.service.DragonStockService;
 import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +39,9 @@ public class DragonStockServiceImpl extends MybatisBaseServiceImpl<DragonStockMa
 
     private final DragonStockMapper dragonStockMapper;
 
-
     private final EastMoneyDragonApi eastMoneyDragonApi;
 
+    private final DragonStockDetailService dragonStockDetailService;
 
     /**
      * 查询当天龙虎榜列表，按游资分类
@@ -60,7 +61,7 @@ public class DragonStockServiceImpl extends MybatisBaseServiceImpl<DragonStockMa
             if (map.containsKey(k)) {
                 map.get(k).getPartners().add(s);
             } else {
-                stock.setPartners(new ArrayList<DragonDetailStockKline>() {{
+                stock.setPartners(new ArrayList<>() {{
                     add(s);
                 }});
                 map.put(k, stock);
@@ -83,7 +84,7 @@ public class DragonStockServiceImpl extends MybatisBaseServiceImpl<DragonStockMa
             } else {
                 DragonDetailPartner partner = DragonDetailPartner.builder().build();
                 BeanUtils.copyProperties(stock, partner);
-                partner.setStocks(new ArrayList<StockKlineDaily>() {{
+                partner.setStocks(new ArrayList<>() {{
                     add(stockKlineDaily);
                 }});
                 map.put(k, partner);
@@ -95,7 +96,7 @@ public class DragonStockServiceImpl extends MybatisBaseServiceImpl<DragonStockMa
     /**
      * 龙虎榜个股列表
      */
-    public Result<List<DragonStock>> syncDragonStockList(String date) {
+    public Result<Integer> syncDragonStockList(String date) {
         int total = 0, pageNum = 0, pageSize = 100;
         Map<String, DragonStock> map = Maps.newHashMap();
         JSONArray data = new JSONArray();
@@ -155,7 +156,16 @@ public class DragonStockServiceImpl extends MybatisBaseServiceImpl<DragonStockMa
         } catch (Exception e) {
             log.error(">>>>>getDragonStockList saveBatch error. {}", e.getMessage());
         }
-        return Result.success(list);
+        // 同步龙虎榜个股买卖详情
+        for (DragonStock d : list) {
+            int cc = dragonStockDetailService.syncDragonStockDetail(d.getTradeDate(), d.getStockCode(), d.getStockName());
+            if (cc == 0) {
+                // 连续请求容易超时，重试一次
+                Threads.sleep(NumberUtils.random(5000));
+                cc = dragonStockDetailService.syncDragonStockDetail(d.getTradeDate(), d.getStockCode(), d.getStockName());
+            }
+        }
+        return Result.success(list.size());
     }
 
     private JSONArray syncDragonStockList(String date, int pageNum, int pageSize) {

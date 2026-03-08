@@ -8,6 +8,6 @@ import java.util.List;
 public interface DragonDeptService {
 
 
-    Result<List<DragonDept>> syncDragonDeptList(String date);
+    Result<Integer> syncDragonDeptList(String date);
 
 }

@@ -34,7 +34,6 @@ public class StockKlineDailyServiceImpl extends MybatisBaseServiceImpl<StockKlin
 
     /**
      * 获取股票实时交易列表，排除688 920 ST
-     *
      */
     public List<StockKlineDaily> syncStockKlineDailyList() {
         String fields = "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f24,f34,f35,f37,f40,f41,f45,f46,f48,f49,f57,f64,f65,f66,f69,f70,f71,f72,f75,f76,f77,f78,f81,f82,f83,f84,f87,f109,f129,f297";
@@ -78,7 +77,7 @@ public class StockKlineDailyServiceImpl extends MybatisBaseServiceImpl<StockKlin
         try {
             log.info(">>>>>syncStockTradeList read finished total:{} list:{} ", total, list.size());
             if (!CollectionUtils.isEmpty(list)) {
-                delete(new LambdaQueryWrapper<StockKlineDaily>().eq(StockKlineDaily::getTradeDate, list.get(0).getTradeDate()));
+                delete(new LambdaQueryWrapper<StockKlineDaily>().eq(StockKlineDaily::getTradeDate, list.getFirst().getTradeDate()));
                 saveBatch(list);
             }
         } catch (Exception e) {
@@ -86,5 +85,8 @@ public class StockKlineDailyServiceImpl extends MybatisBaseServiceImpl<StockKlin
         }
         return list;
     }
+
+    // todo 加入计算日线指标
+    // todo 筛选股票进入股票池
 }
 

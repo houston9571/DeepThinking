@@ -83,8 +83,8 @@ public class Ta4jMinuteIndicatorCalculator {
         int size = list.size();
         StockTechMinute tech = list.getLast();
         // 至少需要10分钟数据（适配分时MA10/BOLL10）
-        if (list.size() < 5) {
-            log.warn("分时数据不足不计算，必须满足5条");
+        if (list.size() < 15) {
+            log.warn("分时数据不足不计算，必须满足15条");
             return tech;
         }
 

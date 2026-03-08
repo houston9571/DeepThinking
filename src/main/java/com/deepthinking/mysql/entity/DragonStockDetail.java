@@ -102,7 +102,7 @@ public class DragonStockDetail extends BaseEntity {
      * 市场总成交量
      */
     @JSONField(alternateNames = "ACCUM_VOLUME", serializeUsing = CountLotsWriter.class)
-    private Long accumVolume;
+    private Long volume;
 
     /**
      * 市场总成交额

@@ -43,7 +43,7 @@ public class DragonDeptServiceImpl extends MybatisBaseServiceImpl<DragonDeptMapp
     /**
      * 龙虎榜个股营业部列表
      */
-    public Result<List<DragonDept>> syncDragonDeptList(String date) {
+    public Result<Integer> syncDragonDeptList(String date) {
         int total = 0, pageNum = 0, pageSize = 100;
         Set<OrgDept> orgDeptSet = Sets.newHashSet();
         ArrayList<DragonDept> list = Lists.newArrayList();
@@ -97,7 +97,7 @@ public class DragonDeptServiceImpl extends MybatisBaseServiceImpl<DragonDeptMapp
         } catch (Exception e) {
             log.error(">>>>>getDragonDeptList saveBatch error. {}", e.getMessage());
         }
-        return Result.success(list);
+        return Result.success(list.size());
     }
 
     private JSONArray syncDragonDeptList(String date, int pageNum, int pageSize) {

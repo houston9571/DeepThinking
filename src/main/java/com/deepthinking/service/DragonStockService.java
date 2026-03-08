@@ -15,6 +15,6 @@ public interface DragonStockService {
 
     List<DragonDetailPartner> queryDragonPartnerDetail(String partnerCode);
 
-    Result<List<DragonStock>> syncDragonStockList(String date);
+    Result<Integer> syncDragonStockList(String date);
 
 }

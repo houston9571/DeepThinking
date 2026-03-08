@@ -10,7 +10,7 @@ public interface ConceptDelayService extends MybatisBaseService<ConceptDelay> {
 
      List<List<ConceptDelay>> queryConceptTradeList(int days, int top);
 
-     void syncConceptTradeList(boolean all, int top);
+     void syncConceptTradeList(int top);
 
 
 

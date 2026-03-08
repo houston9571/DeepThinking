@@ -15,9 +15,11 @@ import com.deepthinking.common.constant.MarketType;
 import com.deepthinking.common.constant.StockCodeUtils;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.StockKlineMinute;
+import com.deepthinking.mysql.entity.StockPool;
 import com.deepthinking.mysql.entity.StockTechMinute;
 import com.deepthinking.mysql.mapper.StockKlineMinuteMapper;
 import com.deepthinking.service.StockKlineMinuteService;
+import com.deepthinking.service.StockPoolService;
 import com.deepthinking.service.StockTechMinuteService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -47,21 +49,13 @@ public class StockKlineMinuteServiceImpl extends MybatisBaseServiceImpl<StockKli
 
     private final EastMoneyH5Api eastMoneyH5Api;
 
-    private final StockTechMinuteService stockTechMinuteService;
-
-    /**
-     * 根据股票池更新个股分时数据 1分钟
-     */
-    public void syncStockKlineMinutePools() {
-        syncStockKlineMinute("000547");
-    }
 
 
     /**
      * 股票实时交易行情和资金流向 每1分钟
      * 获取最后10条，容错及指标计算使用
      */
-    public Result<StockKlineMinute> syncStockKlineMinute(String stockCode) {
+    public Result<Void> syncStockKlineMinute(String stockCode) {
         JSONObject kline = eastMoneyStockApi.getStockTradeRealtime(stockCode, MarketType.getMarketCode(stockCode), SystemClock.now());
         StockKlineMinute stockKlineMinute = JSONObject.parseObject(kline.getString(LABEL_DATA), StockKlineMinute.class);
 //        String transactionDate = kline.getJSONObject(LABEL_DATA).getJSONArray("f80").getJSONObject(1).getString("e");
@@ -87,7 +81,7 @@ public class StockKlineMinuteServiceImpl extends MybatisBaseServiceImpl<StockKli
 
         }
         saveOrUpdate(stockKlineMinute, new String[]{"stock_code", "trade_date", "trade_time"});
-        return Result.success(stockKlineMinute);
+        return Result.success( );
     }
 
 

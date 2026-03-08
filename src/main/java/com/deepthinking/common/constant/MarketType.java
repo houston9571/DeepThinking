@@ -1,5 +1,7 @@
 package com.deepthinking.common.constant;
 
+import com.deepthinking.common.enums.DateFormatEnum;
+import com.deepthinking.common.utils.DateUtils;
 import com.deepthinking.common.utils.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,10 +9,48 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.deepthinking.common.enums.DateFormatEnum.DATE;
+
 public class MarketType {
+
+    public static final Map<String, String> HOLIDAYS = new HashMap<String, String>() {{
+        put("2026-01-01", "元旦");
+        put("2026-01-02", "元旦");
+        put("2026-01-03", "元旦");
+        put("2026-02-17", "春节");
+        put("2026-02-18", "春节");
+        put("2026-02-19", "春节");
+        put("2026-02-20", "春节");
+        put("2026-02-21", "春节");
+        put("2026-02-22", "春节");
+        put("2026-02-23", "春节");
+        put("2026-04-04", "清明节");
+        put("2026-04-05", "清明节");
+        put("2026-04-06", "清明节");
+        put("2026-05-01", "劳动节");
+        put("2026-05-02", "劳动节");
+        put("2026-05-03", "劳动节");
+        put("2026-06-19", "端午节");
+        put("2026-06-20", "端午节");
+        put("2026-06-21", "端午节");
+        put("2026-10-01", "国庆节");
+        put("2026-10-02", "国庆节");
+        put("2026-10-03", "国庆节");
+        put("2026-10-04", "国庆节");
+        put("2026-10-05", "国庆节");
+        put("2026-10-06", "国庆节");
+        put("2026-10-07", "国庆节");
+    }};
+
+    public static final LocalTime MORNING_OPEN = DateUtils.parseLocalTime("09:30:00", DateFormatEnum.TIME);
+    public static final LocalTime MORNING_CLOSE = DateUtils.parseLocalTime("11:30:00", DateFormatEnum.TIME);
+    public static final LocalTime AFTERNOON_OPEN = DateUtils.parseLocalTime("13:00:00", DateFormatEnum.TIME);
+    public static final LocalTime AFTERNOON_CLOSE = DateUtils.parseLocalTime("15:00:00", DateFormatEnum.TIME);
 
     public static final String MARKET_SZ = "SZ", MARKET_SH = "SH", MARKET_BJ = "BJ", MARKET_HK = "HK";
     public static final String MARKET_CODE_SZ = "0", MARKET_CODE_SH = "1", MARKET_CODE_BJ = "2", MARKET_CODE_HK = "116";
@@ -39,8 +79,11 @@ public class MarketType {
 //        put("920", StockExchange.builder().name("北证A股").market(MARKET_BJ).marketCode(MARKET_CODE_BJ).changeLimits(LIMIT_THIRTY).build());
     }};
 
+    /**
+     * 不包含688 920 ST
+     */
     public static boolean contains(String stockCode, String stockName) {
-        return markets.containsKey(stockCode.substring(0, 3)) && !StringUtil.contains(stockName, "ST");
+        return markets.containsKey(stockCode.substring(0, 3)) && !stockName.contains("ST");
     }
 
     public static String getMarket(String stockCode) {
@@ -65,6 +108,28 @@ public class MarketType {
             put("market", getMarket(stockCode));
             put("marketCode", getMarketCode(stockCode));
         }};
+    }
+
+
+    public static  String getTradeDateStr(){
+        return DateUtils.format(LocalDate.now(), DateFormatEnum.DATE);
+    }
+
+    public static boolean isTradeDate() {
+        return isTradeDate(LocalDate.now());
+    }
+
+    public static boolean isTradeDate(LocalDate date) {
+        return (date.getDayOfWeek().getValue() <= 5) && !HOLIDAYS.containsKey(DateUtils.format(date, DATE));
+    }
+
+    public static boolean isTradeTime() {
+        return isTradeTime(LocalTime.now());
+    }
+
+    public static boolean isTradeTime(LocalTime time) {
+        time = time.withSecond(0);
+        return isTradeDate() && (time.isAfter(MORNING_OPEN) && time.isBefore(MORNING_CLOSE)) || (time.isAfter(AFTERNOON_OPEN) && time.isBefore(AFTERNOON_CLOSE));
     }
 
     @Data

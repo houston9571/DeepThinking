@@ -44,15 +44,13 @@ public class TaskRest {
 
     private final DragonStockService dragonStockService;
 
-    private final DragonStockDetailService dragonStockDetailService;
-
     private final DragonDeptService dragonDeptService;
 
     /**
      * 同步更新所有股票基本信息，所属概念
      */
-    @GetMapping("stock/overview")
-    public Result<Integer> overview() {
+    @GetMapping("stock/info")
+    public Result<Integer> syncStockInfo() {
         return stockInfoService.syncStockInfoAll();
     }
 
@@ -68,14 +66,6 @@ public class TaskRest {
         return Result.success();
     }*/
 
-    /**
-     * 同步概念板块列表
-     */
-    @GetMapping("concept/daily")
-    public Result<Void> syncConceptTradeList() {
-        Threads.asyncExecute(() -> conceptDelayService.syncConceptTradeList(true, 100));
-        return Result.success();
-    }
 
     /**
      * 获取所有股票当天交易行情
@@ -88,79 +78,55 @@ public class TaskRest {
     }
 
     /**
-     * 龙虎榜营业部列表
+     * 同步概念板块列表
      */
-    @GetMapping("dragon/dept/{date}")
-    public Result<Void> syncDragonDeptList(@PathVariable String date) {
-        LocalDate end = DateUtils.parseLocalDate("2025-10-01", DATE);
-        LocalDate from = DateUtils.parseLocalDate(date, DATE);
-        while (from.isAfter(end)) {
-            if (from.getDayOfWeek().getValue() < 6) {
-                dragonDeptService.syncDragonDeptList(DateUtils.format(from, DATE));
-                Threads.sleep(2000);
-            }
-            from = from.plusDays(-1);
-        }
+    @GetMapping("concept/daily")
+    public Result<Void> syncConceptTradeList() {
+        Threads.asyncExecute(() -> conceptDelayService.syncConceptTradeList(50));
         return Result.success();
     }
 
     /**
-     * 龙虎榜个股列表
+     * 龙虎榜
      */
-    @GetMapping("dragon/stock/{date}")
-    public Result<Void> syncDragonStockList(@PathVariable String date) {
-        LocalDate end = DateUtils.parseLocalDate("2025-10-01", DATE);
-        LocalDate from = DateUtils.parseLocalDate(date, DATE);
-        while (from.isAfter(end)) {
-            if (from.getDayOfWeek().getValue() < 6) {
-                Result<List<DragonStock>> result = dragonStockService.syncDragonStockList(DateUtils.format(from, DATE));
-                if (result.hasData()) {
-                    List<DragonStock> list = result.getData();
-                    int count = 0;
-                    for (DragonStock d : list) {
-                        int cc = dragonStockDetailService.syncDragonStockDetail(d.getTradeDate(), d.getStockCode(), d.getStockName());
-                        if (cc == 0) {
-                            // 连续请求容易超时，重试一次
-                            Threads.sleep(NumberUtils.random(5000));
-                            cc = dragonStockDetailService.syncDragonStockDetail(d.getTradeDate(), d.getStockCode(), d.getStockName());
-                        }
-                        count += cc;
-                    }
-                    log.info(">>>>>getStockDragonDetail: {} total_save_size:{}", date, count);
-                }
-                Threads.sleep(2000);
+    @GetMapping("dragon/{from}/{to}")
+    public Result<Void> syncDragonStockList(@PathVariable String from, @PathVariable String to) {
+        LocalDate start = DateUtils.parseLocalDate(from, DATE);
+        LocalDate end = DateUtils.parseLocalDate(to, DATE);
+        while (start.isBefore(end)) {
+            if (start.getDayOfWeek().getValue() < 6) {
+                dragonDeptService.syncDragonDeptList(DateUtils.format(start, DATE));
+                dragonStockService.syncDragonStockList(DateUtils.format(start, DATE));
             }
-            from = from.plusDays(-1);
+            start = start.plusDays(1);
         }
         return Result.success();
     }
 
+
+    /**
+     * 获取股票分时行情、资金流向及计算当天所有的k线指标
+     */
+    @GetMapping("stock/trends/all/{code}")
+    public Result<Void> getStockTrendsALL(@PathVariable String code) {
+        return stockTechMinuteService.syncStockTrendsMinuteAll(code);
+    }
 
     /**
      * 获取股票分时行情、资金流向及计算指标
      */
     @GetMapping("stock/trends/{code}")
     public Result<Void> getStockTrends(@PathVariable String code) {
-        return stockTechMinuteService.syncStockTrendsMinuteAll(code);
+        return stockTechMinuteService.syncStockTrendsMinute(code);
     }
+
 
     /**
      * 获取股票实时交易行情 资金流向
-     *
-     * @param codes
-     * @return
      */
-    @GetMapping("stock/kline/{codes}")
-    public Result<List<StockKlineMinute>> getStockTradeRealtime(@PathVariable String codes) {
-        List<StockKlineMinute> list = Lists.newArrayList();
-        String[] codeArray = codes.split(COMMA);
-        for (String code : codeArray) {
-            Result<StockKlineMinute> result = stockKlineMinuteService.syncStockKlineMinute(code);
-            if (result.isSuccess()) {
-                list.add(result.getData());
-            }
-        }
-        return Result.success(list);
+    @GetMapping("stock/kline/{code}")
+    public Result<Void> getStockTradeRealtime(@PathVariable String code) {
+        return stockKlineMinuteService.syncStockKlineMinute(code);
     }
 
 

@@ -65,7 +65,6 @@ public class MybatisBaseServiceImpl<M extends BaseMapper<P>, P extends BaseEntit
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public int saveBatch(List<P> list) {
         if (CollectionUtils.isEmpty(list)) {
             return 0;
@@ -74,7 +73,6 @@ public class MybatisBaseServiceImpl<M extends BaseMapper<P>, P extends BaseEntit
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public int saveBatch(List<P> list, int batchSize) {
         if (CollectionUtils.isEmpty(list)) {
             return 0;
@@ -106,7 +104,6 @@ public class MybatisBaseServiceImpl<M extends BaseMapper<P>, P extends BaseEntit
 
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public int saveOrUpdateBatch(List<P> list, String[] columns) {
         if (CollectionUtils.isEmpty(list)) {
             return 0;
@@ -115,7 +112,6 @@ public class MybatisBaseServiceImpl<M extends BaseMapper<P>, P extends BaseEntit
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public int saveOrUpdateBatch(List<P> list, String[] columns, int batchSize) {
         if (CollectionUtils.isEmpty(list)) {
             return 0;
