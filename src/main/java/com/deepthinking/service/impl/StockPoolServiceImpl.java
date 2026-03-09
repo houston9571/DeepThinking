@@ -35,7 +35,7 @@ public class StockPoolServiceImpl extends MybatisBaseServiceImpl<StockPoolMapper
         stocks.forEach(stock -> {
             String stockCode = stock.getStockCode();
             stockKlineMinuteService.syncStockKlineMinute(stockCode);
-            stockTechMinuteService.syncStockTrendsMinuteAll(stockCode);
+            stockTechMinuteService.syncStockTrendsMinute(stockCode);
         });
         return Result.success(stocks.size()) ;
     }

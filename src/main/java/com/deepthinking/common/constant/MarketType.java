@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.util.Map;
 
 import static com.deepthinking.common.enums.DateFormatEnum.DATE;
 
+@Slf4j
 public class MarketType {
 
     public static final Map<String, String> HOLIDAYS = new HashMap<String, String>() {{
@@ -91,8 +93,13 @@ public class MarketType {
     }
 
     public static String getMarketCode(String stockCode) {
-        if (stockCode.startsWith("BK")) {
-            return "90";
+//        if (stockCode.startsWith("BK")) {
+//            return "90";
+//        }
+        StockExchange e = markets.get(stockCode.substring(0, 3));
+        if (e == null) {
+            log.error("getMarketCode is null. {}", stockCode);
+            return stockCode.startsWith("60") ? MARKET_CODE_SH : MARKET_CODE_SZ;
         }
         return markets.get(stockCode.substring(0, 3)).getMarketCode();
     }
@@ -111,7 +118,7 @@ public class MarketType {
     }
 
 
-    public static  String getTradeDateStr(){
+    public static String getTradeDateStr() {
         return DateUtils.format(LocalDate.now(), DateFormatEnum.DATE);
     }
 
@@ -129,7 +136,7 @@ public class MarketType {
 
     public static boolean isTradeTime(LocalTime time) {
         time = time.withSecond(0);
-        return isTradeDate() && (time.isAfter(MORNING_OPEN) && time.isBefore(MORNING_CLOSE)) || (time.isAfter(AFTERNOON_OPEN) && time.isBefore(AFTERNOON_CLOSE));
+        return isTradeDate() && ((!time.isBefore(MORNING_OPEN) && !time.isAfter(MORNING_CLOSE)) || (!time.isBefore(AFTERNOON_OPEN) && !time.isAfter(AFTERNOON_CLOSE)));
     }
 
     @Data

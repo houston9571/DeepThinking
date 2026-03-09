@@ -103,8 +103,8 @@ public class EncryptUtilsTest extends BaseTest {
 
     @Test
     public void md5() {
-        String s = "secureLogin=zf840_zf840nbsw";
-        String d = EncryptUtils.md5(s + "8033B4C5E8774a59");
+        String s = "yinhuwaini99((";
+        String d = EncryptUtils.md5(s);
         System.out.println(d);
     }
 

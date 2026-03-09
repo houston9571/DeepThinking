@@ -147,7 +147,7 @@ public class ConceptDelayServiceImpl extends MybatisBaseServiceImpl<ConceptDelay
      */
     private void syncConceptFundsFlow(ConceptDelay conceptDelay) {
         try {
-            JSONObject json = eastMoneyConceptApi.syncFundsFlow(conceptDelay.getConceptCode(), MarketType.getMarketCode(conceptDelay.getConceptCode()), System.currentTimeMillis());
+            JSONObject json = eastMoneyConceptApi.syncFundsFlow(conceptDelay.getConceptCode(), "90", System.currentTimeMillis());
             ConceptDelay d = JSONObject.parseObject(json.getString(LABEL_DATA), ConceptDelay.class);
             BigDecimal acc = BigDecimal.valueOf(conceptDelay.getAmount());
             MathContext mc = new MathContext(4, ROUND_MODE);

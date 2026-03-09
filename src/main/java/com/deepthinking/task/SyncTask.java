@@ -37,7 +37,7 @@ public class SyncTask {
 
     private final DragonStockService dragonStockService;
 
-    @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "0 0/20 * * * ?")
     void syncS() {
         LinkedHashMap  map = (LinkedHashMap )OSUtils.getSystemInfo().get("JVM");
         log.info(" --> {}:{}", "TotalMemory", map.get("TotalMemory"));
