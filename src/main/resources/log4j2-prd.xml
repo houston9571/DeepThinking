@@ -4,7 +4,7 @@
 
     <properties>
         <property name="LOG_HOME">logs</property>
-        <property name="LOG_FILE_NAME">deep-thinking-admin</property>
+        <property name="LOG_FILE_NAME">deep-thinking</property>
     </properties>
 
     <Appenders>

@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <name>DeepThinking</name>
     <groupId>com.deepthinking</groupId>
-    <artifactId>DeepThinking</artifactId>
+    <artifactId>deep-thinking</artifactId>
     <version>1.0</version>
+    <name>deep-thinking</name>
 
     <properties>
         <java.version>21</java.version>

@@ -12,6 +12,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import static com.deepthinking.common.constant.Constants.ZONE_ID;
+
 @Slf4j
 @EnableAsync
 @EnableScheduling
@@ -20,7 +22,7 @@ import java.util.TimeZone;
 public class Application {
 
     public static void main(String[] args) {
-//        TimeZone.setDefault(TimeZone.getTimeZone(ZONE_ID));
+        TimeZone.setDefault(TimeZone.getTimeZone(ZONE_ID));
         Locale.setDefault(Locale.CHINA);
 
         ApplicationContext ctx = SpringApplication.run(Application.class, args);
