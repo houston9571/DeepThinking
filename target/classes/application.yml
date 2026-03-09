@@ -5,14 +5,33 @@ server:
     context-path: /
 
 spring:
-  profiles:
-    active: dev
   application:
     name: DeepThinking
   mvc:
     view:
       prefix: /
       suffix: .html
+  datasource:
+    name: quant
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:9571/quant?rewriteBatchedStatements=true
+    username: quant
+    password: 3cf1c9ee82392c9
+    hikari:
+      pool-name: DatebookHikariCP
+      auto-commit: true
+      connection-test-query: SELECT 1
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1765000
+      maximum-pool-size: 50
+      minimum-idle: 20
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 forest:
   backend: okhttp3             # 后端HTTP框架 okhttp3 httpclient
@@ -34,36 +53,8 @@ forest:
   log-handler: com.deepthinking.ext.base.ForestLogHandler
   interceptors: com.deepthinking.ext.interceptor.ForestHttpInterceptor
 
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-#====== config dev =======#
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    name: quant
-    type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/quant?rewriteBatchedStatements=true
-    username: root
-    password: 88888888
-    hikari:
-      pool-name: DatebookHikariCP
-      auto-commit: true
-      connection-test-query: SELECT 1
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1765000
-      maximum-pool-size: 200
-      minimum-idle: 50
 logging:
   config: classpath:log4j2-dev.xml
-  file:
-    name: logs/game-platform-api.log
   level:
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+
