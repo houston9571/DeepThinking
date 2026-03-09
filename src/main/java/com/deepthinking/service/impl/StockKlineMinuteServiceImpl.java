@@ -1,5 +1,6 @@
 package com.deepthinking.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -27,10 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cn.hutool.core.text.StrPool.COMMA;
 import static com.deepthinking.common.constant.Constants.LABEL_DATA;
@@ -67,7 +65,9 @@ public class StockKlineMinuteServiceImpl extends MybatisBaseServiceImpl<StockKli
         }
 
         JSONArray lines = data.getJSONArray("klines");
-        List<StockKlineMinute> minuteList = new ArrayList<>(lines.size());
+        if (CollectionUtil.isEmpty(lines)) {
+            return Result.fail("syncStockKlineMinute 没有数据，可能停盘");
+        }
         for (int i = 0; i < lines.size(); i++) {
             String[] line = lines.getString(0).split(COMMA);
             String[] t = line[0].split("\\s+");
@@ -78,7 +78,6 @@ public class StockKlineMinuteServiceImpl extends MybatisBaseServiceImpl<StockKli
             stockKlineMinute.setMediumNetIn(line[3]);
             stockKlineMinute.setLargeNetIn(line[4]);
             stockKlineMinute.setSuperLargeNetIn(line[5]);
-
         }
         saveOrUpdate(stockKlineMinute, new String[]{"stock_code", "trade_date", "trade_time"});
         return Result.success( );

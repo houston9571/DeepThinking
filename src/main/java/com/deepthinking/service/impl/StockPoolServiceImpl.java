@@ -1,5 +1,6 @@
 package com.deepthinking.service.impl;
 
+import com.deepthinking.common.constant.MarketType;
 import com.deepthinking.ext.base.Result;
 import com.deepthinking.mysql.MybatisBaseServiceImpl;
 import com.deepthinking.mysql.entity.StockPool;
@@ -29,21 +30,23 @@ public class StockPoolServiceImpl extends MybatisBaseServiceImpl<StockPoolMapper
     /**
      * 根据股票池更新个股分时数据 1分钟
      */
-    public  Result<Integer> syncStockMinuteDateFromPool(){
+    public Result<Integer> syncStockMinuteDateFromPool() {
         List<StockPool> stocks = queryList(StockPool.builder().tradeDate(LocalDate.now()).build());
 
         stocks.forEach(stock -> {
             String stockCode = stock.getStockCode();
-            stockKlineMinuteService.syncStockKlineMinute(stockCode);
-            stockTechMinuteService.syncStockTrendsMinute(stockCode);
+            if (MarketType.contains(stockCode, stock.getStockName())) {
+                stockKlineMinuteService.syncStockKlineMinute(stockCode);
+                stockTechMinuteService.syncStockTrendsMinute(stockCode);
+            }
         });
-        return Result.success(stocks.size()) ;
+        return Result.success(stocks.size());
     }
 
     /**
      * 精选股票加入股票池
      */
-    public void addStockPool(){
+    public void addStockPool() {
         // todo
     }
 

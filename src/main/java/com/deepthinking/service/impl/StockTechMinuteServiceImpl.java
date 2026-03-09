@@ -1,5 +1,6 @@
 package com.deepthinking.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -53,6 +54,9 @@ public class StockTechMinuteServiceImpl extends MybatisBaseServiceImpl<StockTech
         }
         JSONArray lines = data.getJSONArray("klines");
         String stockName = data.getString("name");
+        if (CollectionUtil.isEmpty(lines)) {
+            return Result.fail("syncStockTrendsMinute 没有数据，可能停盘");
+        }
         if (lines.size() < 15) {
             log.info(">>>>>syncStockTrendsMinute k线数据未满足15条 stockCode:{} stockName:{} ", stockCode, stockName);
             return Result.fail("");
